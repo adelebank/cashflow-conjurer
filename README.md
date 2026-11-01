@@ -8,6 +8,28 @@ A spooky, pixel-art personal-finance game set in an alchemist's hall. Gold is po
 - Press **E** to interact
 - Sleep on the **red cushion** to end each month
 - Grow your passive income until it covers your expenses to escape the Rat Race
+- Press **G** to see your goal, **N** for the world map
+
+### Levels and endless mode
+
+Levels 1 to 4 each have a fixed goal and a month limit. **Level 5: Endless Conjurer** has no month limit: you pick your own goal (passive income, net worth, gold in hand, assets owned, or debt free) and a starting map. Reaching a goal earns a trophy and lets you set a bigger one, or retire and see your legend.
+
+After winning or losing any other level you can choose **Keep playing this map (endless)** to carry on with the same run in endless mode.
+
+### Maps
+
+Six areas connect in two loops. Walk to a marked exit and press E (in endless mode the world map also offers fast travel).
+
+- **Alchemist Hall**: your home, the kitchen, the Goblin Bank and the red cushion. Exits: the Outside Gate to the yard, the Harbor Stairs down to the harbor
+- **Spooky Yard**: market stalls, Trading Post, Tax Office and Business Office. Exits: the Hall Gate, the Forest Path, the Gaol Road
+- **Enchanted Forest**: a treehouse to sleep in, the Druid's Hollow (bank), real-estate and bond stalls, a Berry Cart and the Faerie Ring (trading). Exits: the Yard Path, the Old Mine Shaft down to the caverns
+- **Crystal Caverns**: a bedroll by the campfire, the Ore Vault (bank), mine-share and business stalls, a Stew Pot and the Gem Exchange (trading). Exits: the Ladder Up to the harbor, the Forest Tunnel
+- **Moonlit Harbor**: a hammock to sleep in, the Harbor Vault (bank), stock and business stalls, a Fish Stall and the Smuggler's Market (trading). Exits: the Hall Stairs, the Cave Mouth, the Prison Hulk
+- **Shadow Gaol**: a rain-soaked prison yard where the tax wizards keep debtors. A cell cot to sleep on, the Warden's Vault (bank), Repossessions (real estate) and Bail Bonds stalls, a Gruel Pot and the Debtors' Auction (trading). Exits: the Gaol Road up to the yard, the Prison Hulk down to the harbor
+
+If the tax wizards catch you while you owe overdue debt, they seize up to $250 and drag you to the Shadow Gaol.
+
+The ledger (L) includes a Fortune chart of your net worth by month.
 
 ## Tech stack
 
