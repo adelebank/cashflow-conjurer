@@ -8,7 +8,19 @@ A spooky, pixel-art personal-finance game set in an alchemist's hall. Gold is po
 - Press **E** to interact
 - Sleep on the **red cushion** to end each month
 - Grow your passive income until it covers your expenses to escape the Rat Race
-- Press **G** to see your goal, **N** for the world map
+- Press **L** for the ledger, **G** for your goal, **N** for the world map, **J** for the story so far, **H** for help
+
+### Story
+
+You have inherited the Alchemist Hall from your Great-Aunt Ysolde, along with her goblin banker, her ledger, and a letter from the Ministry of Dues. The tax wizards would like the hall. Each level opens a chapter of the story, and winning or losing a level adds an epilogue:
+
+1. **The Drafty Hall**: prove to the goblin you can keep coins in a pocket
+2. **The Goblin's Wager**: build income that arrives while you sleep and earn the forest map
+3. **The Wizards Come Knocking**: Form 7-B brings interest, crashes and the Shadow Gaol
+4. **The Siege of Forms**: the Grand Auditor demands the hall sustain itself, in writing
+5. **After the Rat Race**: the hall is yours; answer your aunt's last question at your own pace
+
+Press **J** at any time to re-read the current chapter.
 
 ### Levels and endless mode
 

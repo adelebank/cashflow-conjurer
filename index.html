@@ -45,6 +45,7 @@ button:focus-visible{outline:3px solid var(--grn);outline-offset:2px}
 .ov{position:fixed;inset:0;background:rgba(10,8,30,.88);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9;overflow:auto}
 .ov .box{max-width:520px;background:var(--panel);border:2px solid var(--gold);border-radius:10px;padding:22px}
 .ov h2{color:var(--gold);font-size:24px;margin-bottom:8px}
+#story p{font-size:19px;line-height:1.5;margin:6px 0 12px}.tale{border-left:3px solid #c98a3c;padding-left:10px;font-style:italic;margin:8px 0}
 .ov li{margin:4px 0}
 
 :root,:root:not([data-theme="dark"]),:root[data-theme="dark"]{--bg:#1a1838;--panel:#4a2f1c;--line:#c98a3c;--ink:#f6e6c4;--mute:#d2b27a;--gold:#ffd166;--grn:#7fe0a0;--red:#ff8a70;--btn:#c98a3c;--btnink:#2a1608}
@@ -57,7 +58,7 @@ button{font-family:'VT323',monospace;font-size:20px;border-radius:0;border:3px s
 button.alt{background:#6b4528;color:var(--ink)}
 .track,.fill{border-radius:0}.fill{background:repeating-linear-gradient(90deg,#7fe0a0 0 6px,#4fb97c 6px 8px)}
 #map{width:100%;image-rendering:pixelated;border:3px solid #c98a3c;box-shadow:0 0 0 3px #2a1608;display:block;cursor:pointer;background:#1a1838}
-#tip{margin:8px 0 14px;min-height:46px}
+#tip{margin:8px 0 14px;min-height:46px;font-size:21px}
 #pov{width:100%;image-rendering:pixelated;border:3px solid #c98a3c;box-shadow:0 0 0 3px #2a1608;display:block;background:#1a1838}
 #pad button{margin:0}
 #vp{position:relative;max-width:820px;margin:0 auto}#card{position:absolute;left:1.5%;right:1.5%;bottom:1.5%;max-height:68%;overflow:auto;display:none;z-index:3;font-size:20px}
@@ -85,6 +86,10 @@ button.alt{background:#6b4528;color:var(--ink)}
 #title .box{position:relative;background:linear-gradient(180deg,#5a3a22,#3a2414);box-shadow:0 0 0 3px #2a1608,4px 4px 0 3px #1a0e05,0 0 70px rgba(255,209,102,.22)}
 #title h2{text-shadow:4px 4px 0 #2a1608,0 0 18px rgba(255,209,102,.6);animation:tglow 2.4s ease-in-out infinite alternate}
 @keyframes tglow{to{text-shadow:4px 4px 0 #2a1608,0 0 36px rgba(255,209,102,.95)}}
+@keyframes cardin{from{transform:translateX(-50%) translateY(14px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}#card{animation:cardin .22s ease-out}
+@keyframes fadein{from{opacity:0}to{opacity:1}}.pop,.ov,.grid.open{animation:fadein .2s ease-out}
+.fill.low{animation:bl .9s steps(2) infinite}
+@media(prefers-reduced-motion:reduce){#card,.pop,.ov,.grid.open,.fill.low{animation:none}}
 #tcast{display:flex;justify-content:center;gap:12px;margin:8px 0 2px}#tcast canvas{width:48px;height:84px;image-rendering:pixelated;animation:bob 1.6s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-6px)}}
 @media(prefers-reduced-motion:reduce){#title h2,#tcast canvas,#cash.bump{animation:none}}
@@ -97,17 +102,28 @@ button:active:not(:disabled){transform:translate(2px,2px);box-shadow:inset 3px 3
 .lv .bd{background:#4a2f1c;border:2px solid #c98a3c;border-radius:0;color:var(--gold);font:9px/1 'Press Start 2P',monospace;padding:6px 8px}
 .lv b{font-family:'Press Start 2P',monospace;font-size:11px;line-height:1.6}
 #nwc{box-shadow:inset 0 0 0 1px rgba(255,220,150,.08)}
+/* ===== final polish ===== */
+button{touch-action:manipulation}
+#toasts{position:absolute;left:8px;top:8px;z-index:4;display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:min(300px,62%)}
+.toast{background:rgba(20,12,6,.9);border:2px solid #c98a3c;box-shadow:0 0 0 2px #2a1608;color:#f6e6c4;font:18px/1.15 'VT323',monospace;padding:6px 10px;animation:tin .25s ease-out;transition:opacity .4s,transform .4s}
+.toast.out{opacity:0;transform:translateX(-12px)}
+@keyframes tin{from{opacity:0;transform:translateX(-14px)}}
+@keyframes boxin{from{opacity:0;transform:translateY(10px) scale(.98)}}
+.ov .box,.pop .win{animation:boxin .26s ease-out}
+.ms h3{margin-bottom:6px}.ms .li{padding:3px 0}
+@media(max-width:600px){.toast{font-size:15px;padding:4px 8px}}
+@media(prefers-reduced-motion:reduce){.toast,.ov .box,.pop .win{animation:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header><h1>The Cashflow Conjurer</h1><div><button class="alt" style="margin:0 6px 0 0" onclick="openPop('acts')">Actions (Q)</button><button class="alt" style="margin:0" onclick="openPop('trk')">Expenses (X)</button><button class="alt" style="margin:0 0 0 6px" onclick="openPop('led')">Ledger (L)</button><button class="alt" style="margin:0 0 0 6px" onclick="openPop('goal')">Goal (G)</button><button class="alt" id="snd" style="margin:0 0 0 6px" onclick="muteToggle()">Sound: On</button><button class="alt" style="margin:0 0 0 6px" onclick="openTut()">Help (H)</button></div><div class="stat"><span class="chip" id="lvn"></span><span class="chip">Month <b id="mo">1</b>/<span id="mx">60</span></span><span class="chip"><i class="coin"></i>Gold <b id="cash">0</b></span></div></header>
+<header><h1>The Cashflow Conjurer</h1><div><button class="alt" style="margin:0" onclick="openPop('led')">Ledger (L)</button><button class="alt" style="margin:0 0 0 6px" onclick="openPop('goal')">Goal (G)</button><button class="alt" style="margin:0 0 0 6px" onclick="openStory(1)">Story (J)</button><button class="alt" style="margin:0 0 0 6px" onclick="openTut()">Help (H)</button><button class="alt" id="snd" style="margin:0 0 0 6px" onclick="muteToggle()">Sound: On</button></div><div class="stat"><span class="chip" style="padding:2px 6px"><canvas id="hp" width="24" height="42" style="width:18px;height:32px;image-rendering:pixelated;display:block"></canvas></span><span class="chip" id="lvn"></span><span class="chip">Month <b id="mo">1</b>/<span id="mx">60</span></span><span class="chip"><i class="coin"></i>Gold <b id="cash">0</b></span></div></header>
 <div class="bar"><div class="row"><span>Passive income <b id="pi" class="pos"></b></span><span>Monthly expenses <b id="ex" class="neg"></b></span></div>
 <div class="track"><div class="fill" id="fill"></div></div>
 <div class="mute" id="gl"></div>
 <div class="row" style="margin-top:6px"><span>Hunger <b id="hn"></b></span><span id="od"></span></div><div class="track"><div class="fill" id="hf" style="background:#ff8a70"></div></div></div>
 <div id="vp"><canvas id="pov" style="display:none" width="256" height="144" role="img" aria-label="First-person view of the alchemist hall"></canvas>
-<canvas id="map" width="1318" height="1312" role="img" aria-label="Town map"></canvas><div class="card" id="card"></div></div><div id="pad" style="display:flex;gap:6px;margin:8px 0 0;flex-wrap:wrap"><button class="alt" data-k="arrowleft">&#9664; Left</button><button class="alt" data-k="arrowup">&#9650; Up</button><button class="alt" data-k="arrowdown">&#9660; Down</button><button class="alt" data-k="arrowright">Right &#9654;</button><button onclick="interact()">E: Interact</button><button class="alt" onclick="openPop('world')">World map (N)</button><button class="alt" onclick="levels()">Levels</button></div>
+<canvas id="map" width="1318" height="1312" role="img" aria-label="Town map"></canvas><div class="card" id="card"></div><div id="toasts" aria-live="polite"></div></div><div id="pad" style="display:flex;gap:6px;margin:8px 0 0;flex-wrap:wrap"><button class="alt" data-k="arrowleft">&#9664; Left</button><button class="alt" data-k="arrowup">&#9650; Up</button><button class="alt" data-k="arrowdown">&#9660; Down</button><button class="alt" data-k="arrowright">Right &#9654;</button><button onclick="interact()">E: Interact</button><button class="alt" onclick="openPop('world')">World map (N)</button><button class="alt" onclick="levels()">Levels</button></div>
 <div class="mute" id="tip" role="status" aria-live="polite"></div>
 <div class="grid"><div style="grid-column:1/-1"><button class="alt" onclick="closePop()">X Close ledger</button></div>
 <div>
@@ -115,6 +131,7 @@ button:active:not(:disabled){transform:translate(2px,2px);box-shadow:inset 3px 3
 <div class="panel"><h2>Balance sheet</h2><div id="bal"></div></div>
 <div class="panel"><h2>Market ticker</h2><div id="tk"></div></div>
 <div class="panel"><h2>Tasks (this month)</h2><div id="tasks"></div></div>
+<div class="panel"><h2>Spending (this month)</h2><div id="trk"></div></div>
 <div class="panel"><h2>Fortune chart</h2><canvas id="nwc" width="420" height="130" style="width:100%;image-rendering:pixelated;display:block;border:2px solid #2a1608" role="img" aria-label="Net worth by month"></canvas><div class="mute" id="nwt"></div></div>
 
 <div class="panel"><h2>Cashflow quadrant</h2><div class="chips" id="quad"></div><div class="mute">E employee · S self-employed · B business owner · I investor. Rich Dad's rich live in B and I.</div></div>
@@ -127,12 +144,12 @@ button:active:not(:disabled){transform:translate(2px,2px);box-shadow:inset 3px 3
 </div>
 </div>
 <div class="pop" id="pop_acts" onclick="if(event.target===this)closePop()"><div class="panel win"><div class="row"><h2>Wizard's actions</h2><button class="alt" onclick="closePop()">X Close</button></div><div id="acts"></div></div></div>
-<div class="pop" id="pop_trk" onclick="if(event.target===this)closePop()"><div class="panel win"><div class="row"><h2>Expense tracker (this month)</h2><button class="alt" onclick="closePop()">X Close</button></div><div id="trk"></div></div></div>
 <div class="pop" id="pop_world" onclick="if(event.target===this)closePop()"><div class="panel win"><div class="row"><h2>World map</h2><button class="alt" onclick="closePop()">X Close</button></div><canvas id="wm" width="440" height="270" style="width:100%;image-rendering:pixelated;display:block;border:2px solid #2a1608;background:#1a1838" role="img" aria-label="Map of the five areas and how they connect"></canvas><div id="wmt" class="mute" style="margin-top:6px"></div></div></div>
 <div class="pop" id="pop_goal" onclick="if(event.target===this)closePop()"><div class="panel win"><div class="row"><h2>Your goal</h2><button class="alt" onclick="closePop()">X Close</button></div><div id="goalbox"></div></div></div>
 <div class="ov" id="tut" style="display:none"><div class="box" style="max-width:560px"><div class="tag" id="tutn"></div><h2 id="tutt"></h2><p id="tutx"></p><div class="row"><span><button class="alt" onclick="tutGo(-1)">Back</button><button id="tutnext" onclick="tutGo(1)">Next</button></span><button class="alt" onclick="closeTut()">Skip tutorial</button></div></div></div>
-<div class="ov" id="title" style="background:radial-gradient(#1a1030,#05030c)"><canvas id="tbg" width="320" height="400" aria-hidden="true"></canvas><div class="box" style="text-align:center;max-width:560px"><h2 style="font-size:20px;line-height:1.5">The Cashflow Conjurer</h2><p class="mute">A spooky night in the alchemist hall. Gold is power, debts are ghosts, and the tax wizards are coming.</p><div id="tcast" aria-hidden="true"></div><div id="gsi"></div><p class="mute" id="gmsg" style="font-size:15px"></p><p class="mute" id="pnrow">Profile name: <input id="pname" maxlength="16" value="Wizard" style="font:20px VT323,monospace;background:#241610;color:#f6e6c4;border:2px solid #c98a3c;padding:2px 8px;width:150px"></p><p class="mute" style="font-size:15px">Profiles and saves live in this browser only (no cloud, no password).</p><p class="blink" style="font-size:30px;color:#ffd166;margin:14px 0">Press E to begin</p><button onclick="beginGame()">Begin</button></div></div>
-<div class="ov" id="intro" style="display:none"><div class="box" style="max-width:640px"><h2>Choose your level</h2><p class="mute">Move with arrow keys or WASD, press E to interact, and sleep on the red cushion to end each month. Starve and the game is over.</p><div id="cont" style="margin:6px 0 10px"></div><div class="mute">Pick your character</div><div id="chs" style="display:flex;gap:8px;margin:6px 0 10px;flex-wrap:wrap"></div><div id="lvs"></div><div id="infset" style="display:none;margin-top:10px;border-top:2px solid #c98a3c;padding-top:8px"><h2 style="font-size:12px;line-height:1.6">Level 5: Endless Conjurer</h2><p class="mute">Pick a goal and a starting map. There is no month limit. Reach a goal, earn a trophy, set a bigger one and keep going.</p><div id="infset_in"></div></div></div></div>
+<div class="ov" id="story" style="display:none"><div class="box" style="max-width:560px"><div class="tag" id="stn"></div><h2 id="stt"></h2><p id="stx"></p><div class="row"><span><button class="alt" id="stback" onclick="storyGo(-1)">Back</button><button id="stnext" onclick="storyGo(1)">Next</button></span><button class="alt" onclick="closeStory()">Skip story</button></div></div></div>
+<div class="ov" id="title" style="background:radial-gradient(#1a1030,#05030c)"><canvas id="tbg" width="320" height="400" aria-hidden="true"></canvas><div class="box" style="text-align:center;max-width:560px"><h2 style="font-size:20px;line-height:1.5">The Cashflow Conjurer</h2><p class="mute">A spooky night in the alchemist hall. Gold is power, debts are ghosts, and the tax wizards are coming. They brought forms.</p><div id="tcast" aria-hidden="true"></div><div id="gsi"></div><p class="mute" id="gmsg" style="font-size:15px"></p><p class="mute" id="pnrow">Profile name: <input id="pname" maxlength="16" value="Wizard" style="font:20px VT323,monospace;background:#241610;color:#f6e6c4;border:2px solid #c98a3c;padding:2px 8px;width:150px"></p><p class="mute" style="font-size:15px">Profiles and saves live in this browser only (no cloud, no password).</p><p class="blink" style="font-size:30px;color:#ffd166;margin:14px 0">Press E to begin</p><button onclick="beginGame()">Begin</button></div></div>
+<div class="ov" id="intro" style="display:none"><div class="box" style="max-width:640px"><h2>Choose your level</h2><p class="mute">Walk with the arrow keys, press E to interact, sleep on the red cushion to end the month.</p><div id="cont" style="margin:6px 0 10px"></div><div class="mute">Pick your character</div><div id="chs" style="display:flex;gap:8px;margin:6px 0 10px;flex-wrap:wrap"></div><div id="lvs"></div><div id="infset" style="display:none;margin-top:10px;border-top:2px solid #c98a3c;padding-top:8px"><h2 style="font-size:12px;line-height:1.6">Level 5: Endless Conjurer</h2><p class="mute">Pick a goal and a starting map. Reach it to earn a trophy, then set a bigger one.</p><div id="infset_in"></div></div></div></div>
 <div class="ov" id="end" style="display:none"><div class="box" id="endbox"></div></div>
 <script>
 // ===== Utilities & game state =====
@@ -146,7 +163,9 @@ const salary=()=>S.jobless>0?Math.round(S.wage*.4):S.wage;
 const taxNow=()=>S.jobless>0?0:S.tax;
 const exp=()=>(S.ins?60:0)+taxNow()+S.rent+S.living+S.kids*200+S.liab.reduce((a,x)=>a+x.p,0);
 const flow=()=>salary()+passive()-exp();
-function logit(t){S.log.unshift(t);S.log=S.log.slice(0,6)}
+let mlog=null;
+function logit(t){S.log.unshift(t);S.log=S.log.slice(0,6);if(mlog)mlog.push(t);else toast(t)}
+function toast(t){if(!S||titleUp||menu)return;const b=E('toasts');if(!b)return;const d=document.createElement('div');d.className='toast';d.textContent=t;b.appendChild(d);while(b.children.length>4)b.firstChild.remove();setTimeout(()=>{d.classList.add('out');setTimeout(()=>d.remove(),420)},4200)}
 function init(lv){lv=lv==null?(S&&S.lv)||0:lv;
  S={m:1,cash:1500,wage:2800,tax:450,rent:700,living:600,kids:0,jobless:0,
  liab:[{n:'Apprentice tuition debt',b:12000,p:200},{n:'Goblin credit card',b:3000,p:100},{n:'Dragon mount loan',b:6000,p:200}],
@@ -173,8 +192,8 @@ const DEALS=[
  {n:'Orchard Terraces',t:'Magic garden',c:10000,i:700,l:'garden',d:'Terraces of fruiting trees rented to many tenants.'},
  {n:'Griffin Stable',t:'Business',c:9000,i:640,l:'shop',d:'Griffin rides for tourists, run by hired handlers.'}
 ];
-const DOODADS=[['Self-stirring cauldron',700],['Dragon-leather boots',450],['Crystal-ball TV',1200],['Weekend at the Mage Spa',600]];
-const EMERG=[['Your tower roof leaks',650],['Your familiar needs a healer',420],['Your wand snaps mid-spell',500]];
+const DOODADS=[['Self-stirring cauldron',700,'It stirs itself. You will still stand there and watch it, every single time.'],['Dragon-leather boots',450,'Genuine dragon leather. The dragon has opinions about this and knows where you live.'],['Crystal-ball TV',1200,'Four hundred channels of other wizards having a nicer life than you.'],['Weekend at the Mage Spa',600,'Soak in a hot spring while a goblin reads out your bank balance in a soothing voice.'],['Enchanted air fryer',350,'It fries air. Just air. It does come in rose gold.'],['Scroll+ subscription',90,'Unlimited scrolls for one low monthly fee. You will read one scroll and forget to cancel.'],['Limited edition broom rims',800,'Spinning rims for a broom that has never once left the ground.'],['Heroic portrait of yourself',500,'Painted by a bard who has never seen you. Somehow the likeness is flattering.']];
+const EMERG=[['Your tower roof leaks',650,'Right over the bed. Of course it is right over the bed.'],['Your familiar needs a healer',420,'It ate a glowing mushroom. It is now glowing. The healer does not take IOUs.'],['Your wand snaps mid-spell',500,'The spell was "tidy the kitchen". The kitchen is now on the ceiling.'],['A bard moves in next door',380,'Soundproofing is no longer optional. He knows one song.'],['The outhouse portal misfires',300,'Nobody will say where it went. The plumber-mage charges extra for not asking.']];
 function setCard(c){c.loc=c.loc||'home';S.card=c;S.dlg=0;S.enc=mkEnc(c)}
 function resolve(msg,lesson){S.card.opts=null;S.card.res=msg;S.card.lesson=lesson;render()}
 function draw(){
@@ -184,49 +203,49 @@ function draw(){
 function dealCard(){
  const b=pick(DEALS.filter(d=>S.lv!==1||d.c<=6000)),c=Math.round(b.c*(0.9+Math.random()*.25)/10)*10,i=Math.round(b.i*(0.92+Math.random()*.2)/10)*10;
  setCard({loc:b.l,title:b.n,tag:'Opportunity · '+b.t,text:b.d+' Cost '+$(c)+', pays '+$(i)+' every month.',
- opts:[{l:'Buy for '+$(c),dis:()=>S.cash<c,f:()=>{S.cash-=c;S.assets.push({n:b.n,t:b.t,l:b.l,v:c,val:c,i});logit('Bought '+b.n+' (+'+$(i)+'/mo).');resolve('You bought '+b.n+'.','An asset puts gold in your pocket every month. You just raised passive income by '+$(i)+'. The rich buy assets first.')}},
+ opts:[{l:'Buy for '+$(c),dis:()=>S.cash<c,f:()=>{S.cash-=c;S.assets.push({n:b.n,t:b.t,l:b.l,v:c,val:c,i});logit('Bought '+b.n+' (+'+$(i)+'/mo).');burst(wiz.x,wiz.y-120);sfx('buy');resolve('You bought '+b.n+'.','An asset puts gold in your pocket every month. You just raised passive income by '+$(i)+'. The rich buy assets first.')}},
  {l:'Pass',alt:1,f:()=>{logit('Passed on '+b.n+'.');resolve('You passed.','Not every deal is right, but gold sitting idle earns nothing. Keep an eye on what your cash could be doing.')}}]});
 }
 function doodad(){
- const di=R(0,3),[n,p]=DOODADS[di];
- setCard({loc:'market',kind:'dd',ic:di,price:p,title:n,tag:'Doodad · 50% off today!',text:'Only '+$(p)+' today! Everyone in town has one, and it sparkles so nicely. You deserve a treat, right?',
- opts:[{l:'Buy it ('+$(p)+')',dis:()=>S.cash<p,f:()=>{S.cash-=p;S.sm.Treats+=p;logit('Bought '+n+' for '+$(p)+'.');resolve('You bought '+n+'.','A doodad feels like a reward, but it never pays you back. Let your assets buy the luxuries instead.')}},
- {l:'Skip it',alt:1,f:()=>{logit('Skipped '+n+'.');resolve('You walked away.','Choosing assets over doodads is how the rich get richer while the middle class feels like it earns plenty yet saves nothing.')}}]});
+ const di=R(0,DOODADS.length-1),[n,p,pitch]=DOODADS[di];
+ setCard({loc:'market',kind:'dd',ic:di%4,price:p,title:n,tag:'Doodad · 50% off today!',text:pitch+' Only '+$(p)+' today! You deserve a treat, right?',
+ opts:[{l:'Buy it ('+$(p)+')',dis:()=>S.cash<p,f:()=>{S.cash-=p;S.sm.Treats+=p;logit('Bought '+n+' for '+$(p)+'.');resolve('You bought '+n+'. It is already slightly less shiny.','A doodad feels like a reward, but it never pays you back. Let your assets buy the luxuries instead.')}},
+ {l:'Skip it',alt:1,f:()=>{logit('Skipped '+n+'.');resolve('You walked away. Your gold stayed in your pocket, where it belongs.','Choosing assets over doodads is how the rich get richer while the middle class feels like it earns plenty yet saves nothing.')}}]});
 }
 function emerg(){
- const [n,p0]=pick(EMERG),p=Math.round(p0*(S.lv>=3?1.1:.8)*(S.ins?.25:1));
- setCard({title:n,tag:'Emergency',text:'Repairs cost '+$(p)+'. This one cannot wait.',
+ const [n,p0,fl]=pick(EMERG),p=Math.round(p0*(S.lv>=3?1.1:.8)*(S.ins?.25:1));
+ setCard({title:n,tag:'Emergency',text:fl+' Repairs cost '+$(p)+'. This one cannot wait.',
  opts:[{l:'Pay '+$(p),f:()=>{S.cash-=p;S.sm.Emergencies+=p;logit('Emergency: '+n+' ('+$(-p)+').');resolve('You paid the bill.','Life sends surprise bills. Cash reserves and passive income keep an emergency from becoming a debt spiral.')}}]});
 }
 function eventCard(){
  const k=pick(S.lv===0?['promo','baby','windfall','friend','friend']:['promo','layoff','baby','windfall','friend','friend']);
- if(k==='layoff'&&S.jobless===0)setCard({title:'Guild layoffs',tag:'Event',text:'The guild lets you go. Unemployment pay is only 40% of your wage for 2 months, and your bills keep coming.',
+ if(k==='layoff'&&S.jobless===0)setCard({title:'Guild layoffs',tag:'Event',text:'The guild lets you go. "It is not you, it is the budget," says the guildmaster from his new golden chair. Unemployment pay is 40% of your wage for 2 months, and your bills did not get the memo.',
   opts:[{l:'Ride it out',f:()=>{S.jobless=3;logit('Laid off. Pay drops to 40% for 2 months.');resolve('Your wage stops.','A job is not security. Assets that pay you keep flowing when a paycheck stops.')}}]});
- else if(k==='baby'&&S.kids<2)setCard({title:'A baby dragon hatches',tag:'Event',text:'Joy, and a new monthly cost of '+$(200)+'. Expenses rise.',
+ else if(k==='baby'&&S.kids<2)setCard({title:'A baby dragon hatches',tag:'Event',text:'Joy, and a new monthly cost of '+$(200)+'. It mostly eats furniture. Expenses rise.',
   opts:[{l:'Welcome the hatchling',f:()=>{S.kids++;logit('Family grows: expenses +$200/mo.');resolve('Expenses up '+$(200)+'.','When income rises, expenses tend to rise with it. Your passive income target keeps moving.')}}]});
- else if(k==='friend'){const a=R(4,8)*100;setCard({kind:'friend',npc:R(2,5),title:'A friend needs gold',tag:'Friend',text:'Your old friend Pip finds you in the street. "Just until payday," he says, eyes wide. He asks for '+$(a)+'.',opts:[{l:'Lend '+$(a),dis:()=>S.cash<a,f:()=>{S.cash-=a;S.sm.Giving+=a;const back=Math.random()<.35;if(back)S.pend.push({m:S.m+2,a:Math.round(a*1.1)});logit('Lent '+$(a)+' to Pip.');resolve(back?'Pip swears he will repay you soon.':'Pip thanks you and vanishes.','Never lend what you cannot afford to lose. Money lent to friends is often an asset that pays nothing. If you want to help, set terms or invest in their business.')}},{l:'Give $100 as a gift',alt:1,dis:()=>S.cash<100,f:()=>{S.cash-=100;S.sm.Giving+=100;logit('Gave Pip $100.');resolve('Pip is grateful.','Help within what you can afford and call it a gift, so it never becomes a debt between you.')}},{l:'Politely say no',alt:1,f:()=>{logit('Refused Pip.');resolve('You said no kindly.','Saying no protects your cash flow. You cannot feed your assets if you keep paying for every emergency of others.')}}]})}
- else if(k==='promo')setCard({title:'Promotion',tag:'Event',text:'A raise of '+$(300)+'. The tax collector takes '+$(90)+' of it each month.',
+ else if(k==='friend'){const a=R(4,8)*100;setCard({kind:'friend',npc:R(2,5),title:'A friend needs gold',tag:'Friend',text:'Your old friend Pip finds you in the street. "Just until payday," he says, eyes wide. Pip has not had a payday since the Age of Legends. He asks for '+$(a)+'.',opts:[{l:'Lend '+$(a),dis:()=>S.cash<a,f:()=>{S.cash-=a;S.sm.Giving+=a;const back=Math.random()<.35;if(back)S.pend.push({m:S.m+2,a:Math.round(a*1.1)});logit('Lent '+$(a)+' to Pip.');resolve(back?'Pip swears on his grandmother\'s cauldron that he will repay you.':'Pip thanks you, hugs you, and vanishes in a puff of borrowed smoke.','Never lend what you cannot afford to lose. Money lent to friends is often an asset that pays nothing. If you want to help, set terms or invest in their business.')}},{l:'Give $100 as a gift',alt:1,dis:()=>S.cash<100,f:()=>{S.cash-=100;S.sm.Giving+=100;logit('Gave Pip $100.');resolve('Pip is grateful.','Help within what you can afford and call it a gift, so it never becomes a debt between you.')}},{l:'Politely say no',alt:1,f:()=>{logit('Refused Pip.');resolve('You said no kindly.','Saying no protects your cash flow. You cannot feed your assets if you keep paying for every emergency of others.')}}]})}
+ else if(k==='promo')setCard({title:'Promotion',tag:'Event',text:'A raise of '+$(300)+'! Your new title is Senior Apprentice (Provisional). The tax collector heard before you did and takes '+$(90)+' of it each month.',
   opts:[{l:'Accept',f:()=>{S.wage+=300;S.tax+=90;logit('Promotion: wage +$300, tax +$90.');resolve('Wage up, tax up.','Earned income is taxed the most. Passive income and business income are taxed far more kindly.')}}]});
  else{const a=R(8,20)*100;
-  setCard({title:'Windfall',tag:'Event',text:'A forgotten aunt leaves you '+$(a)+'. What will you do with it?',
+  setCard({title:'Windfall',tag:'Event',text:'A forgotten aunt leaves you '+$(a)+' and a strongly worded note about your posture. What will you do with it?',
   opts:[{l:'Keep it as gold',f:()=>{S.cash+=a;logit('Windfall '+$(a)+' kept as cash.');resolve('Gold added.','Cash helps you grab a deal, but cash that just sits does not grow. Use it for your next asset.')}},
   {l:'Invest it in a fund',alt:1,f:()=>{const i=Math.round(a*0.03);S.assets.push({n:'Windfall mine claim',t:'Gold mine',l:'mine',v:a,val:a,i});logit('Windfall invested: +'+$(i)+'/mo.');resolve('Invested: +'+$(i)+'/mo.','Pay yourself first. Turning a windfall into an asset builds a stream that outlasts the gold itself.')}}]});}
 }
-function act(i){S.card.opts[i].f()}
+function act(i){const o=S.card&&S.card.opts&&S.card.opts[i];if(!o||(o.dis&&o.dis()))return;o.f()}
 function payoff(i){const l=S.liab[i];if(S.cash<l.b)return;S.cash-=l.b;S.paid+=l.b;S.liab.splice(i,1);logit('Paid off '+l.n+': expenses -'+$(l.p)+'/mo.');render()}
 function borrow(){S.cash+=1000;const bp=S.cs>=700?45:S.cs<600?80:60;S.liab.push({n:'Goblin bank loan',b:1000,p:bp});logit('Borrowed $1,000 (+$'+bp+'/mo, set by your credit score of '+S.cs+').');render()}
-function next(){
- if(S.card&&S.card.opts||S.over)return;
- const f=flow();S.cash+=f;
+function next(){if(S.card&&S.card.opts||S.over)return;mlog=[];sfx('sleep');try{monthEnd()}finally{mlog=null}}
+function monthEnd(){
+ const mo=S.m,mw=salary(),mp=passive(),mx=exp(),f=flow();S.cash+=f;
  logit('Month '+S.m+' ends: '+(f>=0?'+':'')+$(f)+' cashflow.');
  S.pend=S.pend.filter(q=>{if(q.m<=S.m){S.cash+=q.a;logit('Pip repaid '+$(q.a)+'!');return false}return true});if(S.jobless>0)S.jobless--;
  S.assets.forEach(a=>{if(a.exp&&S.m>=a.exp&&a.i){a.i=0;a.val=0;logit(a.n+' was a scam! The income stopped and the gold is gone.')}});
  S.assets.forEach(a=>{a.val=Math.max(0,Math.round(a.val*(1+(Math.random()-.4)*(a.l==='mine'?.2:.08))))});
- if(S.crash>0)S.crash--;else if(S.lv>=2&&Math.random()<.1){S.crash=3;S.assets.forEach(a=>{if(a.l==='mine')a.val=Math.round(a.val*.7)});logit('Market crash! Gold mine dividends are halved for 3 months.')}
+ if(S.crash>0)S.crash--;else if(S.lv>=2&&Math.random()<.1){S.crash=3;S.assets.forEach(a=>{if(a.l==='mine')a.val=Math.round(a.val*.7)});logit('Market crash! Gold mine dividends are halved for 3 months. Someone sneezed near the exchange.')}
  if(S.lv>=2)S.liab.forEach(l=>{if(l.n.includes('credit'))l.b=Math.round(l.b*1.03);else if(l.n.includes('loan'))l.b=Math.round(l.b*1.015)});
  S.okM=S.sm.Treats<=300&&!S.od?S.okM+1:0;S.sav=Math.round(S.sav*1.01);S.cs=S.od>0?Math.max(300,S.cs-40):Math.min(800,S.cs+5);
- if(S.lv>=1&&S.m%6===0){S.rent=Math.round(S.rent*1.04);S.living=Math.round(S.living*1.04);logit('Inflation: rent and living costs rose 4%.')}
- if((S.cash+S.sav)<exp())logit('Your savings cover less than one month of bills. Build an emergency fund.');S.lesson=LESSONS[S.lessonN++%LESSONS.length];
+ if(S.lv>=1&&S.m%6===0){S.rent=Math.round(S.rent*1.04);S.living=Math.round(S.living*1.04);logit('Inflation: rent and living costs rose 4%. The landlord sends his regards.')}
+ if((S.cash+S.sav)<exp())logit('Your savings cover less than one month of bills. Build an emergency fund.');S.lesson=LESSONS[S.lessonN++%LESSONS.length];logit('Lesson: '+S.lesson);
  S.sm={Food:0,Treats:0,Emergencies:0,Giving:0};bizMonthEnd();S.managed=!!(S.biz&&S.biz.gm);S.bz=S.biz&&!S.biz.gm?-.2:0;S.paid=0;S.tk={};S.coinsM=0;mktMonth();
  S.hun=Math.max(0,S.hun-8);if(S.hun<=0){starve();return}if(S.od>0)S.od=Math.round(S.od*(S.lv<2?1.03:1.05));
  if(S.cash<0){S.od+=-S.cash;S.cash=0;logit('You could not pay! Overdue debt is '+$(S.od)+'. Tax wizards are coming.')}
@@ -234,14 +253,14 @@ function next(){
  S.nwh=S.nwh||[];S.nwh.push(netWorth());if(S.nwh.length>240)S.nwh.shift();
  const won=goalMet();
  if(won&&!S.inf){S.over='win';S.m++;render();return}
- S.m++;
+ S.m++;monthT=performance.now();
  if(S.m>S.maxM){S.over='lose';render();return}
- draw();render();if(won&&S.inf)goalReached();
+ draw();S.ms={m:mo,w:mw,p:mp,x:mx,f,lines:mlog.filter(l=>!/^(Month \d+ ends|Lesson:)/.test(l))};if(S.hun<30)S.ms.lines.push('You are getting hungry ('+Math.round(S.hun)+'%). Eat soon.');S.dlg=1;render();saveGame();if(won&&S.inf)goalReached();
 }
 function row(a,b,c){return '<div class="li"><span>'+a+'</span><span class="'+(c||'')+'">'+b+'</span></div>'}
 // ===== HUD rendering =====
 function render(){
- E('tip').innerHTML=tipText();E('od').innerHTML=S.od?'Overdue: <b class="neg">'+$(S.od)+'</b>':'';E('mo').textContent=Math.min(S.m,S.maxM);hud();{const ce=E('cash'),cv2=$(S.cash);if(ce.textContent!==cv2){ce.textContent=cv2;ce.classList.remove('bump');void ce.offsetWidth;ce.classList.add('bump')}}
+ E('tip').innerHTML=tipText();E('od').innerHTML=S.od?'Overdue: <b class="neg">'+$(S.od)+'</b>':'';E('mo').textContent=Math.min(S.m,S.maxM);hud();{if(rCash!==S.cash){rCash=S.cash;const ce=E('cash');ce.classList.remove('bump');void ce.offsetWidth;ce.classList.add('bump')}}
  const p=passive(),x=exp();
  E('pi').textContent=$(p);E('ex').textContent=$(x);E('fill').style.width=Math.min(100,goalPct()*100)+'%';E('fill').classList.toggle('hot',goalPct()>=.75);
  let h=row('Wizard wage',$(salary()),'pos')+row('Passive income',$(p),'pos');
@@ -253,6 +272,7 @@ function render(){
  let b='<div class="mute">Assets (fill your pocket)</div>';
  b+=S.assets.length?S.assets.map((a,i)=>row(a.n+' <span class="mute">worth '+$(a.val)+'</span>','+'+$(a.i)+'/mo <button class="alt" style="padding:1px 8px;margin:0 0 0 6px;font-size:16px" onclick="sell('+i+')">Sell</button>','pos')).join(''):'<div class="mute">None yet. Find your first one.</div>';
  b+='<div class="mute" style="margin-top:8px">Liabilities (drain your pocket)</div>'+S.liab.map(l=>row(l.n,$(l.b),'neg')).join('');
+ b+='<div class="mute" style="margin-top:8px">Standing</div>'+row('Savings at the bank',$(S.sav))+row('Safety net',((S.cash+S.sav)/exp()).toFixed(1)+' months of bills')+row('Credit score',S.cs);
  E('bal').innerHTML=b;
  const has=t=>S.assets.some(a=>t(a));
  E('quad').innerHTML=[['E',1],['S',0],['B',has(a=>a.t==='Business')],['I',has(a=>a.t!=='Business')]].map(q=>'<span class="'+(q[1]?'on':'')+'">'+q[0]+'</span>').join('');
@@ -261,7 +281,7 @@ function render(){
   if(c.opts)k+=c.opts.map((o,i)=>'<button class="'+(o.alt?'alt':'')+'" '+(o.dis&&o.dis()?'disabled':'')+' onclick="act('+i+')">'+o.l+'</button>').join('')+'<button class="alt" onclick="S.dlg=0;if(S.enc)S.enc.walk=0;render()">Leave for now</button>';
   else k+='<p><b>'+c.res+'</b></p><div class="lesson"><b>Rich Dad lesson.</b> '+c.lesson+'</div><button onclick="closeDlg()">Continue</button>';
   E('card').innerHTML=k;const pt=E('pt');if(pt&&S.enc)pt.getContext('2d').drawImage(SPR.p[S.enc.k],0,0)}
- if(S.mg)showMg();else if(S.tr)showTr();else if(S.sd!=null)showStaff();E('card').style.display=S.dlg&&c?'block':'none';
+ if(S.ms)showMs();else if(S.mg)showMg();else if(S.tr)showTr();else if(S.sd!=null)showStaff();E('card').style.display=S.dlg&&(c||S.ms)?'block':'none';
  E('nxt').disabled=!!(c&&c.opts)||!!S.over;
  let a=S.liab.map((l,i)=>'<button class="alt" '+(S.cash<l.b||(near!=='bank'&&near!=='tax')?'disabled':'')+' onclick="payoff('+i+')">Pay off '+l.n+' ('+$(l.b)+')<br><span class="mute">frees '+$(l.p)+'/mo</span></button>').join('');
  a+='<button class="alt" '+(near!=='bank'?'disabled':'')+' onclick="borrow()">Borrow $1,000<br><span class="mute">payment depends on credit score</span></button>';
@@ -271,10 +291,11 @@ function render(){
  a+='<div class="mute" style="margin-top:8px">Bank services (at the Goblin Bank):</div><button class="alt" '+(near!=='bank'||S.cash<500?'disabled':'')+' onclick="dep(500)">Deposit $500 (1% a month, compounding)</button><button class="alt" '+(near!=='bank'||S.sav<500?'disabled':'')+' onclick="dep(-500)">Withdraw $500</button><button class="alt" '+(near!=='bank'?'disabled':'')+' onclick="toggleIns()">'+(S.ins?'Cancel insurance':'Buy insurance ($60 a month)')+'</button>';
  E('acts').innerHTML=a;
  E('log').innerHTML=S.log.map(t=>'<div>'+t+'</div>').join('');
- if(S.over){try{localStorage.removeItem(sk())}catch(e){}E('end').style.display='flex';
+ if(S.over){if(!S.endSfx){S.endSfx=1;sfx(S.over==='win'?'win':'hurt')}try{localStorage.removeItem(sk())}catch(e){}E('end').style.display='flex';
   E('endbox').innerHTML=S.over==='win'
-  ?(S.inf?'<h2>A legend retires</h2><p>'+(S.goalsDone||0)+' goal'+(S.goalsDone===1?'':'s')+' conquered across '+(S.m-1)+' months. Passive income reached '+$(p)+' against '+$(x)+' of expenses.</p>'+(S.trophies&&S.trophies.length?'<div class="chips">'+S.trophies.map(q=>'<span class="on">'+q.t+'</span>').join('')+'</div>':''):'<h2>You escaped the Rat Race!</h2><p>Your passive income of '+$(p)+' now covers your '+$(x)+' of expenses. You are free to spend your time on what matters.</p><p class="mute">Net: '+S.assets.length+' assets, '+S.liab.length+' debts, finished in '+(S.m-1)+' months.</p>')+(S.lv<3&&!S.inf?'<button onclick="nextLevel()">Next level</button>':'')+recap()+(S.inf?'':'<button onclick="goEndless()">Keep playing this map (endless)</button>')+'<button class="alt" onclick="restart()">Play again</button><button class="alt" onclick="levels()">Choose level</button>'
-  :'<h2>Still in the Rat Race</h2><p>'+S.maxM+' months passed. Passive income reached '+$(p)+' against '+$(x)+' of expenses.</p><p>Try buying assets earlier, clearing high-cost debt, and resisting doodads.</p>'+recap()+'<button onclick="goEndless()">Keep playing this map (endless)</button><button class="alt" onclick="restart()">Try again</button><button class="alt" onclick="levels()">Choose level</button>'}
+  ?(S.inf?'<h2>A legend retires</h2><p>'+(S.goalsDone||0)+' goal'+(S.goalsDone===1?'':'s')+' conquered across '+(S.m-1)+' months. Passive income reached '+$(p)+' against '+$(x)+' of expenses.</p>'+storyEnd('w')+(S.trophies&&S.trophies.length?'<div class="chips">'+S.trophies.map(q=>'<span class="on">'+q.t+'</span>').join('')+'</div>':''):'<h2>You escaped the Rat Race!</h2><p>Your passive income of '+$(p)+' now covers your '+$(x)+' of expenses. You are free to spend your time on what matters. The tax wizards send a card. It is not a nice card.</p>'+storyEnd('w')+'<p class="mute">Net: '+S.assets.length+' assets, '+S.liab.length+' debts, finished in '+(S.m-1)+' months.</p>')+(S.lv<3&&!S.inf?'<button onclick="nextLevel()">Next level</button>':'')+recap()+(S.inf?'':'<button onclick="goEndless()">Keep playing this map (endless)</button>')+'<button class="alt" onclick="restart()">Play again</button><button class="alt" onclick="levels()">Choose level</button>'
+  :S.over==='starve'?'<h2>You starved</h2><p>Gold means nothing on an empty stomach. You reached month '+Math.min(S.m,S.maxM)+' holding '+$(S.cash)+' gold, but even the richest wizard has to eat. Your familiar inherits everything and plans to spend it on mushrooms.</p>'+recap()+'<button onclick="restart()">Restart the game</button><button class="alt" onclick="levels()">Choose level</button>'
+  :'<h2>Still in the Rat Race</h2><p>'+S.maxM+' months passed. Passive income reached '+$(p)+' against '+$(x)+' of expenses.</p>'+storyEnd('l')+'<p>Try buying assets earlier, clearing high-cost debt, and resisting doodads. The air fryer was not an investment.</p>'+recap()+'<button onclick="goEndless()">Keep playing this map (endless)</button><button class="alt" onclick="restart()">Try again</button><button class="alt" onclick="levels()">Choose level</button>'}
 }
 function restart(){E('end').style.display='none';init();if(S.inf){closePop();gPick('play','New endless run. Pick a goal, or play free.');openPop('goal')}}
 // ===== Canvas, pixel helpers & sprites =====
@@ -284,12 +305,16 @@ const BC=['#7fe0a0','#ff6fa8','#6fb8ff','#ffd166','#c79bff','#ff8a70'];
 const rc=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x|0,y|0,w|0,h|0)};
 const nz=(x,y)=>((x*374761393+y*668265263)>>>0)%100;
 const cnt=l=>S.assets.filter(a=>a.l===l).length;
-let wiz={x:0,y:0};
+let wiz={x:0,y:0},vel={x:0,y:0},rCash=null,dispCash=null;
 function ell(cx,cy,rx,ry,c){for(let y=-ry;y<=ry;y++){const w=Math.round(rx*Math.sqrt(1-y*y/(ry*ry)));rc(cx-w,cy+y,2*w+1,1,c)}}
 let near='',mv={x:null,y:null},last=0;
 const keys={};
-addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT')return;keys[e.key.toLowerCase()]=1;if(!titleUp&&!menu){const k=e.key.toLowerCase();if(k==='q')openPop('acts');if(k==='x')openPop('trk');if(k==='l')openPop('led');if(k==='m')muteToggle();if(k==='h')openTut();if(k==='g')openPop('goal');if(k==='n')openPop('world')}if(e.key==='Escape')closePop();if(e.key==='Escape'&&E('tut').style.display==='flex')closeTut();if(e.key==='Escape'&&S&&S.dlg&&(S.mg||S.tr||S.sd!=null||(S.card&&S.card.opts))){S.dlg=0;S.mg=0;S.tr=0;S.sd=null;if(S.enc)S.enc.walk=0;render()}if(e.key.toLowerCase()==='e'||e.key===' '){if(titleUp)beginGame();else interact();if(e.key===' ')e.preventDefault()}if(e.key.startsWith('Arrow'))e.preventDefault()});
+addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'){if(e.key==='Enter'&&titleUp)beginGame();return}keys[e.key.toLowerCase()]=1;if(!titleUp&&!menu){const k=e.key.toLowerCase();if(k==='q')openPop('acts');if(k==='x')openPop('led');if(k==='l')openPop('led');if(k==='m')muteToggle();if(k==='h')openTut();if(k==='g')openPop('goal');if(k==='n')openPop('world');if(k==='j')openStory(1)}if(e.key==='Escape')closePop();if(e.key==='Escape'&&E('tut').style.display==='flex')closeTut();if(e.key==='Escape'&&E('story').style.display==='flex')closeStory();if(e.key==='Escape'&&S&&S.dlg&&(S.ms||S.mg||S.tr||S.sd!=null||(S.card&&S.card.opts))){S.dlg=0;S.ms=null;S.mg=0;S.tr=0;S.sd=null;if(S.enc)S.enc.walk=0;render()}const onBtn=e.target&&e.target.tagName==='BUTTON';if(e.key.toLowerCase()==='e'||((e.key===' '||e.key==='Enter')&&!onBtn)){if(titleUp)beginGame();else if(E('story').style.display==='flex')storyGo(1);else if(E('tut').style.display==='flex')tutGo(1);else if(!menu)interact();if(e.key===' ')e.preventDefault()}if(e.key.startsWith('Arrow'))e.preventDefault()});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=0});
+addEventListener('blur',()=>{for(const k in keys)keys[k]=0});
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('button');if(b&&!b.disabled&&!b.dataset.k)sfx('ui')},true);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k in keys)keys[k]=0;if(AC)AC.suspend()}else if(AC&&soundOn)AC.resume()});
+document.querySelectorAll('#pad button[data-k]').forEach(b=>{const k=b.dataset.k,on=e=>{e.preventDefault();keys[k]=1;mv.x=mv.k=null},off=()=>{keys[k]=0};b.style.touchAction='none';b.style.userSelect='none';b.addEventListener('pointerdown',on);['pointerup','pointerleave','pointercancel'].forEach(t=>b.addEventListener(t,off));b.addEventListener('contextmenu',e=>e.preventDefault())});
 function mk(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;const o=g;g=c.getContext('2d');fn();g=o;return c}
 const ic=fn=>mk(24,24,fn),SPR={};
 SPR.mark=ic(()=>{ell(12,12,11,11,'rgba(255,230,120,.35)');rc(11,4,2,10,P.glow);rc(11,17,2,2,P.glow)});
@@ -299,28 +324,30 @@ SPR.dd=[()=>{ell(12,19,10,3,'#555');ell(12,12,9,7,'#4a8f8f');ell(12,7,8,2,'#7fe0
 ()=>{rc(2,12,20,9,'#ff8ad0');ell(12,12,10,3,'#ffd0f0');rc(4,6,3,6,'#7fe0a0');rc(15,5,3,6,'#7fe0a0');ell(12,5,2,2,'#ffffee')}].map(ic);
 function closeDlg(){S.dlg=0;if(S.card&&!S.card.opts)S.enc=null;render()}
 function sleep(){if(S.card&&S.card.opts){logit('Unfinished business: a visitor is waiting outside.');render();return}next()}
-function starve(){if(S.over)return;S.over='starve';render();E('endbox').innerHTML='<h2>You starved</h2><p>Gold means nothing on an empty stomach. You reached month '+Math.min(S.m,60)+' holding '+$(S.cash)+' gold, but even the richest wizard has to eat.</p>'+recap()+'<button onclick="restart()">Restart the game</button><button class="alt" onclick="levels()">Choose level</button>';E('end').style.display='flex'}
+function starve(){if(S.over)return;S.over='starve';render()}
 // ===== Player actions, tax wizards & main loop =====
 const FOOD=[['Bread',15,20],['Stew',40,55],['Feast',90,100]];
 function eat(i){const f=FOOD[i];if(S.cash<f[1])return;S.cash-=f[1];S.sm.Food+=f[1];pop(f[0]+' +'+f[2]+' hunger','#f0c75e',wiz.x,wiz.y-290);S.hun=Math.min(100,S.hun+f[2]);logit('Ate '+f[0]+' (-'+$(f[1])+').');render()}
 function payOd(){const q=Math.min(S.cash,S.od);S.cash-=q;S.paid+=q;S.od-=q;if(!S.od)S.cols=[];logit('Paid '+$(q)+' of overdue debt.');render()}
 function spawn(){if(S.cols.length)return;const n=Math.min(3,Math.ceil(S.od/800));for(let i=0;i<n;i++)S.cols.push({x:1060+i*40,y:1030})}
 function caught(){const t=Math.min(S.cash,250);S.cash-=t;S.od=Math.max(0,S.od-t);if(!t)S.hun=Math.max(0,S.hun-25);
- logit('Tax wizards caught you, seized '+$(t)+(t?'':' and spoiled your lunch')+', and dragged you to the Shadow Gaol.');S.cols=[];S.rt=10;setScene('gaol','jail');S.dlg=0;render()}
+ shakeT=performance.now()+450;sfx('hurt');logit('Tax wizards caught you, seized '+$(t)+(t?'':' and spoiled your lunch')+', and dragged you to the Shadow Gaol. They were very polite about it.');S.cols=[];S.rt=10;setScene('gaol','jail');S.dlg=0;render()}
 function tick(t){const dt=Math.min(.05,(t-last)/1000||0);last=t;if(titleUp)titleFx(t);const PX=wiz.x,PY=wiz.y;
- if(S&&!S.over&&!menu&&!popup){gobTick(t,dt);wandTick(dt);if(t-lastMk>6000){lastMk=t;mkTick();ticker();if(S.tr)showTr()}
-  const sp=(S.dlg?0:(S.hun<15?190:300))*dt;
+ if(S){if(dispCash==null)dispCash=S.cash;else dispCash+=(S.cash-dispCash)*Math.min(1,dt*9);if(Math.abs(S.cash-dispCash)<1)dispCash=S.cash;const ce=E('cash'),cvv=$(dispCash);if(ce.textContent!==cvv)ce.textContent=cvv}
+ if(S&&!S.over&&!menu&&!popup){if(fadeTo&&t-fadeTo.at>280){const q=fadeTo;fadeTo=null;setScene(q.n,q.from)}gobTick(t,dt);wandTick(dt);if(t-lastMk>6000){lastMk=t;mkTick();ticker();if(S.tr)showTr()}
+  const spd=(S.dlg||fadeTo)?0:(S.hun<15?190:300);
   {let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
-   if(dx||dy)mv.x=null;else if(mv.x!=null){const ex=mv.x-wiz.x,ey=mv.y-wiz.y,d=Math.hypot(ex,ey);if(d<10)mv.x=null;else{dx=ex/d;dy=ey/d}}
-   const n=Math.hypot(dx,dy)||1;wiz.x+=dx/n*sp;wiz.y+=dy/n*sp}
-  if(!walk(wiz.x,wiz.y)){mv.x=null;if(walk(wiz.x,PY))wiz.y=PY;else if(walk(PX,wiz.y))wiz.x=PX;else{wiz.x=PX;wiz.y=PY}}
+   if(dx||dy)mv.x=mv.k=null;else if(mv.x!=null){const ex=mv.x-wiz.x,ey=mv.y-wiz.y,d=Math.hypot(ex,ey);if(d<10)mv.x=null;else{dx=ex/d;dy=ey/d}}
+   const n=Math.hypot(dx,dy)||1,ak=Math.min(1,dt*16);vel.x+=(dx/n*spd-vel.x)*ak;vel.y+=(dy/n*spd-vel.y)*ak;if(Math.abs(vel.x)<3)vel.x=0;if(Math.abs(vel.y)<3)vel.y=0;wiz.x+=vel.x*dt;wiz.y+=vel.y*dt}
+  if(!walk(wiz.x,wiz.y)){mv.x=null;if(walk(wiz.x,PY)){wiz.y=PY;vel.y=0}else if(walk(PX,wiz.y)){wiz.x=PX;vel.x=0}else{wiz.x=PX;wiz.y=PY;vel.x=vel.y=0}}
   S.hun=Math.max(0,S.hun-(S.dlg?0:dt*.3));if(S.hun<=0)starve();
-  S.cols.forEach(c=>{const ex=wiz.x-c.x,ey=wiz.y-c.y,d=Math.hypot(ex,ey)||1;c.x+=ex/d*105*dt;c.y+=ey/d*105*dt});
+  if(!S.dlg){S.cols.forEach(c=>{const ex=wiz.x-c.x,ey=wiz.y-c.y,d=Math.hypot(ex,ey)||1;c.x+=ex/d*105*dt;c.y+=ey/d*105*dt});
   if(S.od>0&&!S.cols.length&&S.rt>0){S.rt-=dt;if(S.rt<=0)spawn()}
-  if(S.cols.some(c=>Math.hypot(wiz.x-c.x,wiz.y-c.y)<45))caught();
+  if(S.cols.some(c=>Math.hypot(wiz.x-c.x,wiz.y-c.y)<45))caught()}
   const nn=nearNow(),ns=nearStaff();if(nn!==near||ns!==stf){near=nn;stf=ns;render()}
+  if(mv.k){const hit=mv.k==='enc'?near==='enc':mv.k.startsWith('stf:')?stf===+mv.k.slice(4):near===mv.k;if(hit){mv.x=mv.k=null;interact()}else if(mv.x==null)mv.k=null}
   if(S.enc&&S.enc.walk&&S.enc.sc===SCENE&&!S.dlg){const e=S.enc,ex=wiz.x-e.x,ey=wiz.y-e.y,dd=Math.hypot(ex,ey)||1;if(dd>110){e.x+=ex/dd*160*dt;e.y+=ey/dd*160*dt}else{S.dlg=1;render()}}
-  E('hf').style.width=S.hun+'%';E('hn').textContent=Math.round(S.hun)+'%'+(S.hun<25?' HUNGRY!':'')}
+  E('hf').style.width=S.hun+'%';E('hf').classList.toggle('low',S.hun<25);E('hn').textContent=Math.round(S.hun)+'%'+(S.hun<25?' HUNGRY!':'')}
  drawPhoto(t);requestAnimationFrame(tick)}
 E('nxt').onclick=next;
 
@@ -338,11 +365,11 @@ garden:{x:480,y:640,n:'Magic Garden',d:'Magic gardens rent plots to tenants for 
 market:{x:980,y:960,n:'Doodad Market',d:'Shiny things that never pay you back.',ex:960,ey:1060}};
 function mkEnc(c){const k=c.npc!=null?c.npc:R(2,5);if(SCENE!=='hall'){const q=(SCN[SCENE]&&SCN[SCENE].enc)||[300,760];return{x:q[0],y:q[1],k,sc:SCENE,walk:c.kind==='friend'?1:0}}if(c.kind==='friend')return{x:900,y:1080,k,sc:'hall',walk:1};const h=HALL[c.loc]||HALL.home;return{x:h.ex,y:h.ey,k,sc:'hall'}}
 function nearNow(){if(S.enc&&S.enc.sc===SCENE&&Math.hypot(wiz.x-S.enc.x,wiz.y-S.enc.y)<130)return'enc';let b='',m=170;for(const k in HS){const d=Math.hypot(wiz.x-HS[k].x,wiz.y-HS[k].y);if(d<m){m=d;b=k}}return b}
-function interact(){if(!S||S.over||S.dlg)return;
+function interact(){if(!S||S.over||fadeTo)return;if(popup){closePop();render();return}if(S.ms){closeMs();return}if(S.dlg)return;
  if(near==='enc'){S.dlg=1;render();return}
  if(stf>=0){S.sd=stf;S.stip='';S.dlg=1;render();return}
  if(near==='trade'){S.tr=1;S.tmsg='';S.dlg=1;render();return}
- if(HS[near]&&HS[near].to){setScene(HS[near].to,SCENE);return}
+ if(HS[near]&&HS[near].to){goScene(HS[near].to,SCENE);return}
  if(near==='office'){S.mg=1;S.dlg=1;render();return}
  if(near==='cart'){eat(S.cash>=40?1:0);return}
  if(near==='tax'){if(S.od||S.liab.length)payDown();return}
@@ -407,7 +434,7 @@ function ember(fr){const hat='#5c3d9e',hd=sh2(hat,.7),hair='#f08a3c',hh='#ffbd72
  // face
  rc(6,12,13,1,skin);rc(5,13,15,8,skin);rc(6,21,13,1,skin);rc(8,22,9,1,sk2);rc(5,20,14,1,sk2);rc(6,21,13,1,sk2);
  rc(5,19,2,1,'#ff9aa8');rc(18,19,2,1,'#ff9aa8');rc(11,21,2,1,'#c0504a');
- [8,16].forEach((cx,i)=>{rc(cx-2,15,5,1,dk);rc(cx-2,16,5,4,'#ffffff');rc(cx-1,16,3,4,eye);rc(cx-1,16,3,1,sh2(eye,.55));rc(cx-1,19,3,1,sh2(eye,1.35));rc(cx-1,17,1,1,'#ffffff');rc(cx+1,19,1,1,'#ffffff');rc(cx,17,1,2,'#1a0e20');rc(i?cx+3:cx-3,15,1,3,dk)});
+ eyes(fr===3,eye,dk);
  // bangs under the brim
  rc(4,9,16,2,hair);for(let x=4;x<=19;x++)rc(x,11,1,(x*7)%3===0?2:1,hair);rc(6,9,3,1,hh);rc(14,9,2,1,hh);rc(11,10,1,2,hk);
  // floppy witch hat: cone, band, asymmetric brim
@@ -416,39 +443,71 @@ function ember(fr){const hat='#5c3d9e',hd=sh2(hat,.7),hair='#f08a3c',hh='#ffbd72
 function outl(){const d=g.getImageData(0,0,24,42),a=d.data,o=[];
  for(let y=0;y<42;y++)for(let x=0;x<24;x++){const i=(y*24+x)*4;if(a[i+3]===0){for(const q of [[1,0],[-1,0],[0,1],[0,-1]]){const xx=x+q[0],yy=y+q[1];if(xx>=0&&yy>=0&&xx<24&&yy<42){const j=(yy*24+xx)*4;if(a[j+3]>0){o.push([i,a[j],a[j+1],a[j+2]]);break}}}}}
  o.forEach(q=>{a[q[0]]=q[1]*.35;a[q[0]+1]=q[2]*.35;a[q[0]+2]=q[3]*.4;a[q[0]+3]=255});g.putImageData(d,0,0)}
-function anime(k,fr){const [hat,band,hair,hi,skin,eye,coat,acc,pants,boots,style]=AP[k],dk='#2a1a30';
- if(k===0)return mk(24,42,()=>{ember(fr);outl()});
- return mk(24,42,()=>{
-  ell(12,15,11,9,hair);
-  if(style==='twin'){ell(3,23,2,8,hair);ell(21,23,2,8,hair);rc(1,15,4,2,acc);rc(19,15,4,2,acc)}
-  if(style==='long'){rc(2,16,3,17,hair);rc(19,16,3,17,hair)}
-  if(style==='bob'){rc(2,16,3,10,hair);rc(19,16,3,10,hair)}
-  if(style==='spiky'){[[3,11,3,5],[19,11,3,5],[1,9,3,4],[20,9,3,4],[2,14,2,5],[20,14,2,5]].forEach(q=>rc(q[0],q[1],q[2],q[3],hair))}
-  const ll=fr===2?2:0,rl=fr===1?2:0;
-  rc(9,34,3,3,pants);rc(12,34,3,3,pants);rc(8,37-ll,4,3,boots);rc(12,37-rl,4,3,boots);rc(8,37-ll,4,1,sh2(boots,1.3));rc(12,37-rl,4,1,sh2(boots,1.3));
-  rc(8,26,8,9,coat);rc(8,26,2,9,sh2(coat,.75));rc(9,26,6,2,acc);rc(11,27,2,2,'#ff5a7a');rc(8,31,8,1,acc);rc(6,27,2,6,coat);rc(16,27,2,6,coat);rc(6,33,2,2,skin);rc(16,33,2,2,skin);rc(6,27,1,6,sh2(coat,.75));
-  ell(12,18,9,8,skin);rc(5,23,14,1,sh2(skin,.85));
-  rc(5,21,3,1,'#ff9aa8');rc(16,21,3,1,'#ff9aa8');
-  [8,16].forEach((cx,i)=>{rc(cx-2,17,5,1,dk);rc(cx-2,18,5,4,'#ffffff');rc(cx-1,18,3,4,eye);rc(cx-1,18,3,1,sh2(eye,.55));rc(cx-1,21,3,1,sh2(eye,1.35));rc(cx-1,19,1,1,'#ffffff');rc(cx+1,21,1,1,'#ffffff');rc(cx,19,1,2,'#1a0e20');rc(i?cx+3:cx-3,17,1,3,dk)});
-  rc(11,23,2,1,'#c0504a');
-  ell(12,11,10,4,hair);for(let x=3;x<=21;x++)rc(x,12,1,2+((x*5)%3)+(x%7===0?2:0),hair);
-  rc(3,12,2,8,hair);rc(19,12,2,8,hair);rc(7,8,5,1,hi);rc(14,9,3,1,hi);rc(6,12,1,3,hi);rc(17,12,1,3,hi);rc(11,12,1,2,hi);
-  for(let i=0;i<8;i++){const w=2+i;rc(13-(w>>1),1+i,w,1,hat);rc(13+(w>>1)-1,1+i,1,1,sh2(hat,.7))}
-  rc(5,9,17,2,hat);rc(5,10,17,1,sh2(hat,.7));rc(10,7,7,1,band);rc(13,4,1,1,'#ffd166');rc(12,4,3,1,'#ffe9a0');
-  outl()})}
+// Hat type, outfit cut and held prop for every character except Ember (slot 0).
+const FIT={1:['tall','tunic','staff'],2:['witch','skirt','wand'],3:['hood','tunic','book'],4:['cap','skirt','book'],5:['witch','skirt','bag'],6:['hood','robe','staff'],7:['tall','tunic','lantern'],8:['witch','skirt','wand'],9:['cap','tunic','bag'],10:['witch','robe','staff'],11:['cap','tunic','lantern'],12:['witch','skirt','lantern']};
+function eyes(blink,eye,dk){[8,16].forEach((cx,i)=>{if(blink){rc(cx-2,18,5,1,dk);rc(i?cx+2:cx-2,17,1,1,dk);rc(cx-1,19,3,1,'#e8a8a8')}else{rc(cx-2,15,5,1,dk);rc(cx-2,16,5,4,'#ffffff');rc(cx-1,16,3,4,eye);rc(cx-1,16,3,1,sh2(eye,.55));rc(cx-1,19,3,1,sh2(eye,1.35));rc(cx-1,17,1,1,'#ffffff');rc(cx+1,19,1,1,'#ffffff');rc(cx,17,1,2,'#1a0e20');rc(i?cx+3:cx-3,15,1,3,dk)}})}
+function drawFace(skin,eye,blink,dk){const sk2=sh2(skin,.86);rc(6,12,13,1,skin);rc(5,13,15,8,skin);rc(6,21,13,1,skin);rc(8,22,9,1,sk2);rc(5,20,14,1,sk2);rc(6,21,13,1,sk2);rc(5,19,2,1,'#ff9aa8');rc(18,19,2,1,'#ff9aa8');rc(11,21,2,1,'#c0504a');eyes(blink,eye,dk)}
+function witchHat(hat,band){const hd=sh2(hat,.7),hl=sh2(hat,1.25);for(let i=0;i<7;i++){const w=2+i,x0=13-(w>>1)+(i<2?1:0);rc(x0,i,w,1,hat);rc(x0+w-1,i,1,1,hd);if(i>1)rc(x0,i,1,1,hl)}rc(10,6,6,1,band);rc(2,7,17,1,hat);rc(3,8,15,1,hd);rc(1,8,2,1,hat);rc(18,8,1,1,hd);rc(3,7,4,1,hl)}
+function toon(k,fr){const [hat,band,hair,hi,skin,eye,coat,acc,pants,boots,style]=AP[k],[ht,fit,prop]=FIT[k]||['witch','skirt','none'],dk='#2a1a30',hd=sh2(hat,.7),hl=sh2(hat,1.25),hk=sh2(hair,.8),cd=sh2(coat,.74),cl=sh2(coat,1.2),ad=sh2(acc,.85),bd=sh2(boots,.6),bh=sh2(boots,1.25),blink=fr===3,ll=fr===2?1:0,rl=fr===1?1:0,wood='#6a4020',wd2='#4a2a14';
+ // held prop that sits behind the body
+ if(prop==='staff'){rc(22,6,1,36,wood);for(let y=8;y<42;y+=5)rc(22,y,1,2,wd2);rc(21,3,3,3,band);rc(21,3,1,1,sh2(band,1.3));rc(22,2,1,1,sh2(band,1.3));rc(21,6,3,1,wd2);if(k===6){rc(21,11,1,1,wd2);rc(23,17,1,1,wd2);rc(21,25,1,1,wd2)}}
+ // hair behind the head
+ if(ht!=='hood'){
+  if(style==='long'){rc(2,11,3,16,hair);rc(19,11,3,16,hair);rc(2,27,2,1,hk);rc(20,27,2,1,hk);rc(3,14,1,4,hi);rc(20,14,1,3,hi);rc(2,22,1,5,hk);rc(21,22,1,5,hk)}
+  if(style==='twin'){rc(1,14,3,10,hair);rc(20,14,3,10,hair);rc(1,24,2,2,hair);rc(21,24,2,2,hair);rc(2,16,1,5,hi);rc(21,16,1,4,hi);rc(1,12,3,2,acc);rc(20,12,3,2,acc);rc(1,23,1,3,hk);rc(22,23,1,3,hk)}
+  if(style==='bob'){rc(3,11,2,9,hair);rc(19,11,2,9,hair);rc(4,19,2,1,hair);rc(18,19,2,1,hair);rc(3,13,1,3,hi);rc(20,13,1,2,hi);rc(3,18,1,2,hk);rc(20,18,1,2,hk)}
+  if(style==='spiky'){[[2,10,3,2],[1,12,3,2],[2,14,2,2],[19,10,3,2],[20,12,3,2],[20,14,2,2]].forEach(q=>rc(q[0],q[1],q[2],q[3],hair));rc(3,10,1,1,hi);rc(20,10,1,1,hi);rc(1,13,1,1,hk);rc(22,13,1,1,hk)}}
+ // legs
+ if(fit==='skirt'){rc(9,36,2,2,pants);rc(13,36,2,2,pants);rc(9,36,1,2,sh2(pants,.85))}
+ else if(fit==='tunic'){rc(8,34,3,4,pants);rc(13,34,3,4,pants);rc(8,34,1,4,sh2(pants,.75));rc(13,34,1,4,sh2(pants,.75))}
+ // boots
+ rc(8,38-ll,4,4,boots);rc(8,38-ll,4,1,bh);rc(8,41-ll,4,1,bd);rc(8,39-ll,1,2,sh2(boots,.8));rc(12,38-rl,4,4,boots);rc(12,38-rl,4,1,bh);rc(12,41-rl,4,1,bd);rc(12,39-rl,1,2,sh2(boots,.8));
+ // lower garment
+ if(fit==='skirt'){rc(7,32,11,1,coat);rc(6,33,13,2,coat);rc(5,35,15,1,cd);rc(9,32,3,1,cl);for(let x=6;x<=18;x++)rc(x,x%3===1?33:34,1,1,acc)}
+ else if(fit==='tunic'){rc(7,32,11,3,coat);rc(7,32,1,3,cd);rc(16,32,1,3,cd);rc(7,34,11,1,cd);rc(11,32,2,2,cd)}
+ else{rc(7,32,11,2,coat);rc(6,34,13,2,coat);rc(5,36,15,2,coat);rc(5,37,15,1,cd);rc(5,36,1,2,cd);rc(19,36,1,2,cd);rc(11,32,2,5,cl);rc(10,32,1,5,acc);rc(13,32,1,5,acc)}
+ // torso
+ rc(7,26,11,6,coat);rc(7,26,1,6,cd);rc(16,26,1,6,cd);rc(9,27,2,1,cl);
+ if(fit==='tunic'){rc(11,26,2,6,cd);rc(12,27,1,1,band);rc(12,29,1,1,band);rc(6,31,13,1,band);rc(11,31,2,1,sh2(band,1.3));rc(6,31,1,1,sh2(band,.7))}
+ if(fit==='robe'){rc(11,26,2,6,cl);rc(10,26,1,6,acc);rc(13,26,1,6,acc)}
+ // sleeves, cuffs, hands
+ rc(6,26,2,1,coat);rc(17,26,2,1,coat);rc(4,27,4,4,coat);rc(17,27,4,4,coat);rc(4,27,1,4,cd);rc(20,27,1,4,cd);
+ if(fit==='skirt')rc(4,28,17,1,acc);
+ if(fit==='robe'){rc(3,28,2,4,coat);rc(20,28,2,4,coat);rc(3,27,1,5,cd);rc(21,27,1,5,cd);rc(3,31,3,1,acc);rc(19,31,3,1,acc)}else{rc(5,31,2,1,acc);rc(18,31,2,1,acc)}
+ rc(5,32,2,1,skin);rc(18,32,2,1,skin);if(prop==='staff')rc(20,32,2,1,skin);
+ // collar
+ if(fit==='skirt'){rc(8,23,9,3,acc);rc(8,25,9,1,ad);rc(10,23,1,2,ad);rc(13,23,1,2,ad)}
+ else if(fit==='tunic'){rc(8,23,9,3,skin);rc(8,25,9,1,sh2(skin,.86));rc(7,25,4,1,acc);rc(14,25,4,1,acc);rc(10,25,5,1,coat);rc(11,25,3,1,cd)}
+ else{rc(8,23,9,3,coat);rc(8,23,9,1,cl);rc(7,24,2,2,acc);rc(16,24,2,2,acc)}
+ drawFace(skin,eye,blink,dk);
+ // bangs (and a tuft of top hair for the cap)
+ rc(4,9,16,2,hair);for(let x=4;x<=19;x++)rc(x,11,1,(x*7+k)%3===0?2:1,hair);rc(6,9,3,1,hi);rc(14,9,2,1,hi);rc(11,10,1,2,hk);
+ if(ht==='cap'){rc(5,8,14,1,hair);if(style==='spiky'){rc(4,7,2,1,hair);rc(18,7,2,1,hair);rc(7,7,1,1,hair);rc(16,7,1,1,hair)}}
+ // hats
+ if(ht==='witch')witchHat(hat,band);
+ else if(ht==='tall'){for(let i=0;i<8;i++){const w=2+(i>>1)*2,x0=12-(w>>1)+(i<2?1:0);rc(x0,i,w,1,hat);rc(x0+w-1,i,1,1,hd);if(i>1)rc(x0,i,1,1,hl)}rc(8,7,8,1,band);rc(11,7,1,1,sh2(band,1.3));rc(4,8,16,1,hat);rc(16,8,4,1,hd);rc(4,8,3,1,hl)}
+ else if(ht==='cap'){rc(8,5,8,1,hat);rc(6,6,12,1,hat);rc(5,7,14,1,hat);rc(5,8,15,1,hd);rc(5,8,7,1,hat);rc(8,5,3,1,hl);rc(6,6,2,1,hl);rc(12,4,1,1,band);rc(11,3,1,1,band)}
+ else if(ht==='hood'){rc(11,4,2,1,hat);rc(9,5,7,1,hat);rc(7,6,11,1,hat);rc(6,7,13,1,hat);rc(5,8,15,2,hat);rc(4,10,2,13,hat);rc(19,10,2,13,hat);rc(3,23,4,4,hat);rc(18,23,4,4,hat);rc(4,10,1,13,hd);rc(20,10,1,13,hd);rc(3,23,1,4,hd);rc(21,23,1,4,hd);rc(5,26,2,1,hd);rc(18,26,3,1,hd);rc(9,5,3,1,hl);rc(7,6,2,1,hl);rc(6,7,1,3,hl);rc(5,9,1,1,hl)}
+ // props in front
+ if(prop==='wand'){rc(21,26,1,7,'#c89a5a');rc(21,32,1,1,'#8a6a3a');rc(20,24,3,1,band);rc(21,23,1,3,band);rc(21,24,1,1,'#ffffff')}
+ if(prop==='book'){rc(1,27,5,6,band);rc(1,27,1,6,sh2(band,.65));rc(2,28,3,4,'#f4ecd8');rc(3,28,1,4,'#d8ccb0');rc(2,33,4,1,sh2(band,.65))}
+ if(prop==='lantern'){rc(20,31,4,1,'#3a2a1a');rc(21,30,2,1,'#3a2a1a');rc(20,32,1,6,'#3a2a1a');rc(23,32,1,6,'#3a2a1a');rc(21,32,2,1,'#5a4a2a');rc(21,33,2,4,'#ffd166');rc(21,33,1,1,'#fff3a0');rc(21,36,2,1,'#ff9a3a');rc(20,37,4,1,'#3a2a1a')}
+ if(prop==='bag'){rc(1,30,5,5,boots);rc(1,30,5,2,bd);rc(1,30,1,5,bd);rc(3,32,1,1,band);rc(5,26,1,4,bd);rc(4,29,2,1,bd)}}
+function anime(k,fr){return mk(24,42,()=>{if(k===0)ember(fr);else toon(k,fr);outl()})}
 AP.push(['#3a3a5a','#ffd166','#dfe6f0','#ffffff','#f4c8a0','#d03a3a','#1a1a24','#d03a3a','#2a2a38','#111111','spiky'],['#e0709a','#ffffff','#ff8ac8','#ffd0ec','#fbd5b5','#3a6ad0','#f6f0ff','#ffd166','#4a5ab0','#fafafa','twin'],['#2a8a5a','#ffd166','#3a8ae0','#9ad0ff','#e0b080','#e0802a','#2f6a4a','#ffd166','#2a3a2a','#6a4a2a','spiky'],['#5a4a9a','#c0b0ff','#b9a0f0','#e8dcff','#f2c9a0','#9aa0b0','#3a2f6a','#c0b0ff','#2a2a44','#d0d0e0','long'],['#8a5a2a','#ffd166','#6a3a1a','#a8703a','#c8906a','#3a8a3a','#d6a02a','#fff2d0','#4a3a2a','#3a2a1a','bob'],['#d03a3a','#ffd166','#e03a3a','#ff8a7a','#f4c8a0','#2a8a6a','#f0e0c0','#d03a3a','#6a3a2a','#8a4a2a','bob']);
-SPR.f=AP.map((_,k)=>[0,1,2].map(fr=>anime(k,fr)));SPR.p=SPR.f.map(f=>f[0]);
-let hero=0,face=1,fxs=[],coins=[],lastS=null,lastCash=0,ctime=0;
-const TIPS=['Assets put gold in your pocket.','Liabilities take it out.','Pay yourself first.','Doodads are tempting. Resist!','Make your money work for you.'];
+SPR.f=AP.map((_,k)=>[0,1,2,3].map(fr=>anime(k,fr)));SPR.p=SPR.f.map(f=>f[0]);
+let hero=0,face=1,fxs=[],coins=[],lastS=null,lastCash=0,ctime=0,puffs=[],lastPuff=0,shakeT=0,monthT=0;
+const blinkAt=(t,s)=>((t+s*977)%3400)<150;
+const TIPS=['Assets put gold in your pocket.','Liabilities take it out.','Pay yourself first.','Doodads are tempting. Resist!','Make your money work for you.','The cauldron does not need rims.','Pip is not an investment.','A budget is a spell you cast on future you.','Compound interest: magic that actually works.','Nobody ever got rich from an air fryer.'];
 function pop(t,c,x,y){fxs.push({t,c,x,y,a:0})}
 function glow(x,y,r,a){G.globalAlpha=Math.min(1,a);G.drawImage(GL,x-r,y-r,r*2,r*2);G.globalAlpha=1}
 function hs(k,x,y,fr,fc,bob){G.save();G.translate(x,y-bob);G.scale(fc*4.6,4.6);G.drawImage(SPR.f[k][fr],-12,-40);G.restore()}
-function drawPhoto(t){if(!S)return;const c=S.card,W2=WW,H2=HH,e=S.enc;G.setTransform(SCALE,0,0,SCALE,0,0);G.imageSmoothingEnabled=true;
- if(lastS!==S){lastS=S;lastCash=S.cash;coins=[];fxs=[];gob=null;parts=[]}
+function drawPhoto(t){if(!S)return;const c=S.card,W2=WW,H2=HH,e=S.enc;G.setTransform(SCALE,0,0,SCALE,0,0);G.imageSmoothingEnabled=true;if(t<shakeT){const a=(shakeT-t)/45;G.translate((Math.random()-.5)*a,(Math.random()-.5)*a)}
+ if(lastS!==S){lastS=S;lastCash=S.cash;dispCash=S.cash;coins=[];fxs=[];puffs=[];gob=null;parts=[]}
  if(S.cash!==lastCash){const d=S.cash-lastCash;pop((d>0?'+':'-')+$(Math.abs(d)),d>0?'#7fe0a0':'#ff8a70',wiz.x,wiz.y-240);lastCash=S.cash}
  const lx=wiz.lx==null?wiz.x:wiz.lx,ly=wiz.ly==null?wiz.y:wiz.ly,moving=Math.hypot(wiz.x-lx,wiz.y-ly)>.4;if(wiz.x-lx>.4)face=1;else if(lx-wiz.x>.4)face=-1;wiz.lx=wiz.x;wiz.ly=wiz.y;if(moving&&!menu&&t-lastStep>320){lastStep=t;sfx('step')}
  if(coins.length<4&&t-ctime>5000&&!S.over){ctime=t;for(let i=0;i<30;i++){const x=80+Math.random()*1000,y=330+Math.random()*850;if(walk(x,y)){coins.push({x,y});break}}}
- if(!S.dlg&&!S.over)coins=coins.filter(q=>{if(Math.hypot(wiz.x-q.x,wiz.y-q.y)<60){S.cash+=10;S.coinsM++;sfx('coin');render();return false}return true});
+ if(!S.dlg&&!S.over)coins=coins.filter(q=>{if(Math.hypot(wiz.x-q.x,wiz.y-q.y)<60){S.cash+=10;S.coinsM++;sfx('coin');for(let i=0;i<7;i++)parts.push({x:q.x,y:q.y-24,vx:(Math.random()-.5)*9,vy:-Math.random()*9-2,l:22,c:i%2?'#ffd166':'#fff3a0'});render();return false}return true});
  G.drawImage(baseLayer(),0,0);G.imageSmoothingEnabled=false;if(FX[SCENE])FX[SCENE](t);
  const pu=.5+.5*Math.sin(t/300);ambPre(t);
  G.globalCompositeOperation='lighter';(GLOWS[SCENE]||GLOWS.hall).forEach((q,i)=>glow(q[0],q[1],170,.22+.08*Math.sin(t/110+i*2)));G.globalCompositeOperation='source-over';
@@ -462,22 +521,30 @@ function drawPhoto(t){if(!S)return;const c=S.card,W2=WW,H2=HH,e=S.enc;G.setTrans
  {const sx=HALL.door.x,sy=HALL.door.y;ellp(sx,sy+6,78,30,null,'rgba(120,170,255,'+(.12+pu*.1)+')');for(let i=0;i<4;i++){G.fillStyle=i%2?'#6a6f8a':'#565b78';G.fillRect(sx-40+i*6,sy-44+i*13,80-i*12,11)}G.fillStyle='#0a0812';G.fillRect(sx-20,sy+8,40,12);G.fillStyle='#9ad0ff';G.fillRect(sx-14,sy+11,28,3)}
  for(const k in HS)if(lblOn(HS[k]))plate(HS[k].n,HS[k].x,HS[k].y-110-plateOff(HS[k]),null,k===near);
  if(Math.hypot(wiz.x-400,wiz.y-890)<380)[['Bread $15','#f4ecd8'],['Stew $40','#f0c75e'],['Feast $90','#ff8ad0']].forEach((q,i)=>lbl(q[0],400,830+i*34,q[1]));}else{for(const k in HS)if(lblOn(HS[k]))plate(HS[k].n,HS[k].x,HS[k].y-110-plateOff(HS[k]),null,k===near)}
+ if(mv.x!=null&&!S.dlg){const mp=((t-(mv.t||0))/600)%1;ellp(mv.x,mv.y,10+mp*26,4+mp*10,'rgba(255,209,102,'+(.8*(1-mp)).toFixed(2)+')',null);ellp(mv.x,mv.y,6,3,null,'#ffd166')}
  coins.forEach((q,i)=>{const b=Math.sin(t/200+i)*6;ellp(q.x,q.y,22,8,null,'rgba(0,0,0,.3)');ellp(q.x,q.y-24+b,15,15,'#8a5a00','#ffd166');G.fillStyle='#fff3a0';G.fillRect(q.x-6,q.y-34+b,5,5)});
  const sh=(x,y)=>ellp(x,y,44,15,null,'rgba(0,0,0,.35)'),idle=Math.sin(t/260)*2,wf=1+((t/140)|0)%2;
- const L=[{y:wiz.y,f:()=>{sh(wiz.x,wiz.y);heroRing(t);hs(hero,wiz.x,wiz.y,moving?wf:0,face,moving?Math.abs(Math.sin(t/120))*5:idle)}}];
+ if(moving&&!S.dlg&&t-lastPuff>150){lastPuff=t;puffs.push({x:wiz.x+(Math.random()-.5)*24,y:wiz.y+6+(Math.random()-.5)*6,t})}
+ puffs=puffs.filter(q=>t-q.t<520);puffs.forEach(q=>{const f=(t-q.t)/520;G.globalAlpha=.35*(1-f);ellp(q.x,q.y-f*10,8+f*14,4+f*6,null,'#d8c8b0');G.globalAlpha=1});
+ const L=[{y:wiz.y,f:()=>{sh(wiz.x,wiz.y);heroRing(t);hs(hero,wiz.x,wiz.y,moving?wf:(blinkAt(t,0)?3:0),face,moving?Math.abs(Math.sin(t/120))*5:idle)}}];
  if(gob&&gob.sc===SCENE)L.push({y:gob.y,f:()=>{const x=gob.x,y=gob.y,b=Math.abs(Math.sin(t/90))*8;ellp(x,y,34,12,null,'rgba(0,0,0,.35)');G.fillStyle='#4fae4f';G.fillRect(x-22,y-70-b,44,52);G.fillStyle='#3a8a3a';G.fillRect(x-22,y-30-b,44,12);G.fillStyle='#6fce6f';G.fillRect(x-26,y-110-b,52,42);G.beginPath();G.moveTo(x-26,y-96-b);G.lineTo(x-52,y-112-b);G.lineTo(x-26,y-80-b);G.fill();G.beginPath();G.moveTo(x+26,y-96-b);G.lineTo(x+52,y-112-b);G.lineTo(x+26,y-80-b);G.fill();G.fillStyle='#ffe14a';G.fillRect(x-16,y-98-b,10,10);G.fillRect(x+6,y-98-b,10,10);G.fillStyle='#2a1a10';G.fillRect(x-12,y-94-b,4,6);G.fillRect(x+10,y-94-b,4,6);G.fillStyle='#8a5a2b';G.fillRect(x+16,y-64-b,30,34);G.fillStyle='#ffd166';G.fillRect(x+27,y-54-b,8,14);lbl('Thief!',x,y-130-b,'#ff6a6a')}});
  S.cols.forEach(q=>L.push({y:q.y,f:()=>{sh(q.x,q.y);ellp(q.x,q.y-80,70,100,null,'rgba(255,40,40,.15)');hs(6,q.x,q.y,wf,q.x<wiz.x?1:-1,Math.abs(Math.sin(t/130))*5);lbl('TAX!',q.x,q.y-235,'#ff6a6a')}}));
  STAFF.filter(f=>f.cat&&f.sc===SCENE).forEach(f=>L.push({y:f.y+14,f:()=>{const x=f.x,y=f.y,c={re:'#2d7a4a',st:'#c9a227',bz:'#2f8f8a',sv:'#7a4ac0'}[f.cat];G.fillStyle='#3a2410';G.fillRect(x-72,y-250,8,250);G.fillRect(x+64,y-250,8,250);G.fillStyle=c;G.fillRect(x-80,y-262,160,34);G.fillStyle='#f4ecd8';for(let i=0;i<8;i+=2)G.fillRect(x-80+i*20,y-262,20,34);G.fillStyle='#5a3a22';G.fillRect(x-76,y-62,152,62);G.fillStyle='#8a5a2b';G.fillRect(x-80,y-70,160,12);for(let i=0;i<4;i++){G.fillStyle=['#7fe0a0','#ffd166','#ff8ad0','#6fb8ff'][(i+x)%4];G.fillRect(x-60+i*32,y-92,22,22)}lbl(f.stall,x,y-274,'#ffd166')}}));
  WAND.filter(w=>w.sc===SCENE).forEach(w=>L.push({y:w.y,f:()=>{sh(w.x,w.y);hs(w.k,w.x,w.y,1+((t/200)|0)%2,w.fc||1,Math.abs(Math.sin(t/130))*4)}}));
- STAFF.filter(f=>f.sc===SCENE).forEach(f=>L.push({y:f.y,f:()=>{sh(f.x,f.y);hs(f.k,f.x,f.y,0,f.x>wiz.x?-1:1,Math.abs(Math.sin(t/600+f.x))*3);if(Math.hypot(wiz.x-f.x,wiz.y-f.y)<300){tag2(f.n,f.r,f.x,f.y-208)}}}));
-  if(e&&e.sc===SCENE)L.push({y:e.y,f:()=>{sh(e.x,e.y);hs(e.k,e.x,e.y,e.walk?wf:0,e.x>wiz.x?-1:1,Math.abs(Math.sin(t/450))*4);spr(SPR.mark,e.x,e.y-215+Math.sin(t/300)*8,4,12);
+ STAFF.filter(f=>f.sc===SCENE).forEach(f=>L.push({y:f.y,f:()=>{sh(f.x,f.y);hs(f.k,f.x,f.y,blinkAt(t,f.x)?3:0,f.x>wiz.x?-1:1,Math.abs(Math.sin(t/600+f.x))*3);if(Math.hypot(wiz.x-f.x,wiz.y-f.y)<300){tag2(f.n,f.r,f.x,f.y-208)}}}));
+  if(e&&e.sc===SCENE)L.push({y:e.y,f:()=>{sh(e.x,e.y);hs(e.k,e.x,e.y,e.walk?wf:(blinkAt(t,e.x)?3:0),e.x>wiz.x?-1:1,Math.abs(Math.sin(t/450))*4);spr(SPR.mark,e.x,e.y-215+Math.sin(t/300)*8,4,12);
   if(c&&c.kind==='dd'){ellp(e.x+110,e.y-150,100,100,null,'rgba(255,220,100,.22)');spr(SPR.dd[c.ic],e.x+110,e.y-90+Math.sin(t/250)*10,6,22);lbl('$'+c.price+' SALE!',e.x+110,e.y-250)}}});
  L.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
- if(!S.dlg&&(t/1000)%20<4)lbl(TIPS[(t/20000|0)%5],wiz.x,wiz.y-250,'#ffffff');
+ if(!S.dlg&&!S.over&&!menu&&(near||stf>=0)){const kx=wiz.x+58,ky=wiz.y-236+Math.sin(t/220)*4;G.fillStyle='#1a0e05';G.fillRect(kx-15,ky-15,30,33);G.fillStyle='#fff3a0';G.fillRect(kx-12,ky-12,24,24);G.fillStyle='#e0c060';G.fillRect(kx-12,ky+9,24,4);G.font='18px "Press Start 2P",monospace';G.textAlign='center';G.fillStyle='#1a0e05';G.fillText('E',kx,ky+8)}
+ if(!S.dlg&&(t/1000)%20<4)lbl(TIPS[(t/20000|0)%TIPS.length],wiz.x,wiz.y-250,'#ffffff');
  if(c&&c.kind==='dd'&&e){G.fillStyle=P.gold;const k=t/90|0;for(let i=0;i<24;i++)G.fillRect(e.x+(nz(i*7,k)-30)*5,e.y-300+nz(i*3,k+5)*3.5,6,6)}
  fxs=fxs.filter(f=>f.a<80);fxs.forEach(f=>{f.a++;G.globalAlpha=Math.min(1,(80-f.a)/30);lbl(f.t,f.x,f.y-f.a*1.8,f.c);G.globalAlpha=1});
- if(S.cols.some(q=>Math.hypot(wiz.x-q.x,wiz.y-q.y)<260)){G.fillStyle='rgba(255,0,0,.12)';G.fillRect(0,0,W2,H2)}fxPost(t);ambPost(t);const fd=t-sceneT;if(fd<420){G.fillStyle='rgba(5,3,12,'+(1-fd/420)+')';G.fillRect(0,0,W2,H2)}if(fd>200&&fd<2800&&!menu&&SCN[SCENE]){G.save();G.globalAlpha=fd<600?(fd-200)/400:fd>2200?(2800-fd)/600:1;G.font='34px "Press Start 2P",monospace';G.textAlign='center';G.lineWidth=10;G.strokeStyle='#1a0e05';G.strokeText(SCN[SCENE].n,W2/2,150);G.fillStyle='#ffd166';G.fillText(SCN[SCENE].n,W2/2,150);G.restore()}}
-cv.onclick=e=>{const b=cv.getBoundingClientRect();mv.x=(e.clientX-b.left)/b.width*WW;mv.y=(e.clientY-b.top)/b.height*HH};
+ if(S.cols.some(q=>Math.hypot(wiz.x-q.x,wiz.y-q.y)<260)){G.fillStyle='rgba(255,0,0,.12)';G.fillRect(0,0,W2,H2)}fxPost(t);ambPost(t);const md=t-monthT;if(md>0&&md<2200&&!menu&&!S.over){G.save();G.globalAlpha=md<300?md/300:md>1600?(2200-md)/600:1;G.font='28px "Press Start 2P",monospace';G.textAlign='center';G.lineWidth=10;G.strokeStyle='#1a0e05';G.strokeText('Month '+Math.min(S.m,S.maxM),W2/2,236);G.fillStyle='#fff3a0';G.fillText('Month '+Math.min(S.m,S.maxM),W2/2,236);G.restore()}const fd=t-sceneT;if(fd<420){G.fillStyle='rgba(5,3,12,'+(1-fd/420)+')';G.fillRect(0,0,W2,H2)}if(fd>200&&fd<2800&&!menu&&SCN[SCENE]){G.save();G.globalAlpha=fd<600?(fd-200)/400:fd>2200?(2800-fd)/600:1;G.font='34px "Press Start 2P",monospace';G.textAlign='center';G.lineWidth=10;G.strokeStyle='#1a0e05';G.strokeText(SCN[SCENE].n,W2/2,150);G.fillStyle='#ffd166';G.fillText(SCN[SCENE].n,W2/2,150);G.restore()}if(fadeTo){G.fillStyle='rgba(5,3,12,'+Math.min(1,(t-fadeTo.at)/280).toFixed(3)+')';G.fillRect(0,0,W2,H2)}}
+cv.onclick=e=>{if(!S||S.over||menu||popup||fadeTo||S.dlg)return;const b=cv.getBoundingClientRect(),x=(e.clientX-b.left)/b.width*WW,y=(e.clientY-b.top)/b.height*HH;
+ let best=null,bd=110;for(const k in HS){const d=Math.hypot(x-HS[k].x,y-HS[k].y);if(d<bd){bd=d;best={k,x:HS[k].x,y:HS[k].y}}}
+ STAFF.forEach((f,i)=>{if(f.sc!==SCENE)return;const d=Math.hypot(x-f.x,y-f.y);if(d<bd){bd=d;best={k:'stf:'+i,x:f.x,y:f.y}}});
+ if(S.enc&&S.enc.sc===SCENE&&Math.hypot(x-S.enc.x,y-S.enc.y)<bd)best={k:'enc',x:S.enc.x,y:S.enc.y};
+ mv.x=best?best.x:x;mv.y=best?best.y:y;mv.k=best?best.k:null;mv.t=performance.now()};
 // ===== Levels, goals & ledger =====
 const LVN=['Coin Keeper','Gold Grower','Financial Wizard','Kingdom Master','Endless Conjurer'],LVC=[[0,.35,.6],[0,.3,.55],[0,.3,.55],[0,.2,.5],[0,.25,.5]];
 const GOAL=['Save $5,000 and keep treats under $300 for 6 months in a row (14 months).','Reach $800 passive income and $800 in savings within 30 months. Only safer deals appear.','Make passive income cover all your expenses within 54 months. Markets crash and debts grow interest.','Cover expenses with passive income and hold 3 months of expenses in cash within 66 months. Emergencies hit harder.','Endless: choose your own goal and map, and play with no month limit.'];
@@ -486,15 +553,15 @@ const LVD=[['Learn budgeting and tracking expenses.','Beginner','#e9d5ff',sv('#6
 ['Learn saving, assets, and income.','Easy','#fde68a',sv('#92400e','<path d="M12 21v-8M12 13c0-4 3-6 7-6 0 4-3 6-7 6zM12 15c0-3-2-5-6-5 0 3 2 5 6 5z"/>')],
 ['Explore interest, risk, investing, and debt.','Medium','#bae6fd',sv('#1e5a8a','<path d="M2 5h8a2 2 0 0 1 2 2v13a2 2 0 0 0-2-2H2zM22 5h-8a2 2 0 0 0-2 2v13a2 2 0 0 1 2-2h8z"/>')],
 ['Balance expenses, emergencies, and long-term goals.','Hard','#bbf7d0',sv('#166534','<path d="M4 21V9h2V6h2v3h2V6h4v3h2V6h2v3h2v12zM10 21v-5a2 2 0 0 1 4 0v5"/>')],
-['Pick your own goal and starting map, then play with no month limit. Reach a goal, set a bigger one, keep going.','Endless','#fecdd3',sv('#9f1239','<path d="M18.2 8a4 4 0 0 1 0 8c-3 0-5-4-6.2-4s-3.2 4-6.2 4a4 4 0 0 1 0-8c3 0 5 4 6.2 4s3.2-4 6.2-4z"/>')]];
+['Your own goal, your own map, no month limit.','Endless','#fecdd3',sv('#9f1239','<path d="M18.2 8a4 4 0 0 1 0 8c-3 0-5-4-6.2-4s-3.2 4-6.2 4a4 4 0 0 1 0-8c3 0 5 4 6.2 4s3.2-4 6.2-4z"/>')]];
 E('chs').innerHTML='';PLAY.forEach(k=>{const b=document.createElement('button');b.className='alt';b.style.cssText='padding:4px;margin:0';const cx=document.createElement('canvas');cx.width=24;cx.height=42;cx.style.cssText='width:72px;height:126px;image-rendering:pixelated;display:block';cx.getContext('2d').drawImage(SPR.f[k][0],0,0);b.appendChild(cx);b.insertAdjacentHTML('beforeend','<div class="mute">'+FN[k]+'</div>');b.onclick=()=>{hero=k;[...E('chs').children].forEach((x,j)=>x.style.outline=j===PLAY.indexOf(k)?'3px solid #ffd166':'none')};E('chs').appendChild(b)});E('chs').children[0].style.outline='3px solid #ffd166';
 function levels(){closePop();menu=true;E('end').style.display='none';E('infset').style.display='none';E('intro').style.display='flex'}
-function start(l){if(l===4){E('infset').style.display='block';gPick('start');E('infset').scrollIntoView({behavior:'smooth',block:'start'});return}for(const k in keys)keys[k]=0;menu=false;E('intro').style.display='none';init(l);openTut()}
-function startInf(){for(const k in keys)keys[k]=0;menu=false;E('intro').style.display='none';E('infset').style.display='none';init(4);S.goal=mkGoal();logit('Endless run begins. Goal: '+S.goal.t+'.');if(gmap!=='hall'){setScene(gmap);if(S.card)S.enc=mkEnc(S.card)}render();openTut()}
+function start(l){if(l===4){E('infset').style.display='block';gPick('start');E('infset').scrollIntoView({behavior:'smooth',block:'start'});return}for(const k in keys)keys[k]=0;menu=false;E('intro').style.display='none';init(l);openStory()}
+function startInf(){for(const k in keys)keys[k]=0;menu=false;E('intro').style.display='none';E('infset').style.display='none';init(4);S.goal=mkGoal();logit('Endless run begins. Goal: '+S.goal.t+'.');if(gmap!=='hall'){setScene(gmap);if(S.card)S.enc=mkEnc(S.card)}render();openStory()}
 function goalPct(){if(S.inf){const g=S.goal;if(!g)return 0;const c=GK[g.k].f();return g.k==='debt'?(g.v?Math.max(0,1-c/g.v):1):Math.min(1,Math.max(0,c/g.v))}const p=passive(),x=exp()||1;return[Math.min(1,(S.cash+S.sav)/5000)/2+Math.min(1,S.okM/6)/2,Math.min(1,p/600)/2+Math.min(1,(S.cash+S.sav)/800)/2,p/1100,Math.min(1,p/1300)/2+Math.min(1,(S.cash+S.sav)/(3*Math.max(1,x-taxNow())))/2][S.lv]}
 function goalMet(){return goalPct()>=1&&!S.od}
 function sell(i){const a=S.assets[i];if(!a)return;const pr=Math.round(a.val*.95),g2=pr-a.v;const tx=pr>a.v?Math.round((pr-a.v)*.15):0;S.cash+=pr-tx;S.assets.splice(i,1);logit('Sold '+a.n+' for '+$(pr)+' ('+(g2>=0?'+':'')+$(g2)+' vs cost, 5% fee, '+$(tx)+' gains tax). Income -'+$(a.i)+'/mo.');render()}
-function hudStats(){E('lvn').textContent='Level '+(S.lv+1)+': '+LVN[S.lv]+(S.inf&&S.lv!==4?' (endless)':'');E('mx').textContent=S.inf?'\u221e':S.maxM;E('gl').textContent='Goal: '+goalText()+' | Safety net: '+((S.cash+S.sav)/exp()).toFixed(1)+' months | Credit '+S.cs+(S.inf?' | Trophies '+(S.goalsDone||0):'');
+function hudStats(){const hp=E('hp');if(hp&&hp.dataset.k!==String(hero)){hp.dataset.k=hero;const x=hp.getContext('2d');x.clearRect(0,0,24,42);x.drawImage(SPR.p[hero],0,0)}E('lvn').textContent='Level '+(S.lv+1)+': '+LVN[S.lv]+(S.inf&&S.lv!==4?' (endless)':'');E('mx').textContent=S.inf?'\u221e':S.maxM;E('gl').textContent='Goal: '+goalText()+(S.inf&&S.goalsDone?' | Trophies '+S.goalsDone:'');
  const inc=salary()+passive()||1,m=S.sm,rows=[['Bills',exp(),'#ff8a70'],['Food',m.Food,'#f0c75e'],['Treats',m.Treats,'#c79bff'],['Emergencies',m.Emergencies,'#6fb8ff'],['Giving',m.Giving,'#7fe0a0']];
  E('trk').innerHTML=rows.map(r=>'<div class="li"><span>'+r[0]+'</span><span>'+$(r[1])+'</span></div><div class="track" style="height:8px;margin:2px 0 6px"><div class="fill" style="width:'+Math.min(100,r[1]/inc*100)+'%;background:'+r[2]+'"></div></div>').join('')+'<div class="mute">'+(m.Treats>300?'<span class="neg">Treats are over the $300 budget.</span> ':'Keep treats under $300 a month. ')+'Left after bills and spending: <b>'+$(flow()-m.Food-m.Treats-m.Emergencies-m.Giving)+'</b></div>'}
 // ===== Audio, music & ambience =====
@@ -509,8 +576,8 @@ function audioInit(){if(AC)return;try{AC=new(window.AudioContext||window.webkitA
  const l2=AC.createOscillator(),l2g=AC.createGain();l2.frequency.value=.11;l2g.gain.value=300;l2.connect(l2g);l2g.connect(bp.frequency);l2.start();AN={buf}}
 
 function sfx(k){if(!AC||AC.state!=='running')return;const n=AC.currentTime;
- const tone=(f1,f2,d,ty,v)=>{const x=AC.createOscillator(),q=AC.createGain();x.type=ty;x.frequency.setValueAtTime(f1,n);x.frequency.exponentialRampToValueAtTime(f2,n+d);q.gain.setValueAtTime(.0001,n);q.gain.linearRampToValueAtTime(v,n+d*.3);q.gain.exponentialRampToValueAtTime(.0001,n+d);x.connect(q);q.connect(AC.destination);x.start(n);x.stop(n+d)};
- if(k==='ghost')tone(520,300,2.8,'sine',.05);else if(k==='coin')tone(880,1320,.18,'square',.04);else if(k==='bell')tone(220,218,3,'triangle',.06);else if(k==='step')tone(90,60,.08,'triangle',.05);
+ const tone=(f1,f2,d,ty,v,o)=>{const s=n+(o||0),x=AC.createOscillator(),q=AC.createGain();x.type=ty;x.frequency.setValueAtTime(f1,s);x.frequency.exponentialRampToValueAtTime(f2,s+d);q.gain.setValueAtTime(.0001,s);q.gain.linearRampToValueAtTime(v,s+d*.3);q.gain.exponentialRampToValueAtTime(.0001,s+d);x.connect(q);q.connect(AC.destination);x.start(s);x.stop(s+d)};
+ if(k==='ghost')tone(520,300,2.8,'sine',.05);else if(k==='ui')tone(700,900,.05,'square',.015);else if(k==='buy'){[523,659,784].forEach((f,i)=>tone(f,f*1.01,.14,'square',.035,i*.08))}else if(k==='win'){[523,659,784,1047,1319].forEach((f,i)=>tone(f,f*1.001,.3,'triangle',.05,i*.11))}else if(k==='hurt')tone(300,70,.4,'sawtooth',.05);else if(k==='sleep'){tone(660,330,.7,'sine',.05);tone(495,247,.9,'sine',.04,.18)}else if(k==='door')tone(220,110,.28,'triangle',.05);else if(k==='coin')tone(880,1320,.18,'square',.04);else if(k==='bell')tone(220,218,3,'triangle',.06);else if(k==='step')tone(90,60,.08,'triangle',.05);
  else if(k==='thunder'){const sr=AC.createBufferSource();sr.buffer=AN.buf;const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=180;const q=AC.createGain();q.gain.setValueAtTime(.4,n);q.gain.exponentialRampToValueAtTime(.001,n+2.5);sr.connect(f);f.connect(q);q.connect(AC.destination);sr.start(n);sr.stop(n+2.6)}}
 function ambPre(t){
  if(!menu&&t>nextAmb){nextAmb=t+6000+Math.random()*9000;const r=Math.random();if(r<.35){flash=t;sfx('thunder')}else sfx(r<.7?'ghost':'bell')}}
@@ -531,7 +598,11 @@ const HARBOR={hulk:{x:130,y:940,n:'Prison Hulk',d:'A gangway up to the rotting p
 const POLYS={yard:YP,harbor:HP};
 function inPoly(x,y){const Q=POLYS[SCENE]||POLY;let c=false;for(let i=0,j=Q.length-1;i<Q.length;j=i++){const a=Q[i],b=Q[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])c=!c}return c}
 const ENTRY={hall:{yard:[960,760],harbor:[660,1090],d:[960,760]},yard:{hall:[150,780],forest:[1150,1150],gaol:[150,1100],d:[150,780]},harbor:{hall:[180,760],cave:[1180,940],gaol:[200,900],d:[180,760]},forest:{yard:[130,800],cave:[1130,1150],d:[130,800]},cave:{harbor:[150,760],forest:[1130,1150],d:[150,760]},gaol:{yard:[150,760],harbor:[1130,1150],jail:[1160,790],d:[150,760]}};
-function setScene(n,from){const prev=from||SCENE;SCENE=n;sceneT=performance.now();for(const k in HS)delete HS[k];Object.assign(HS,SCENES[n]||HALL);const en=ENTRY[n]||ENTRY.hall,sp=en[prev]||en.d;wiz.x=sp[0];wiz.y=sp[1];coins=[];S.cols.forEach((c,i)=>{c.x=wiz.x+220+i*40;c.y=wiz.y+120});mv.x=null;unstick();render()}
+let fadeTo=null;
+function goScene(n,from){if(fadeTo||!S)return;fadeTo={n,from:from||SCENE,at:performance.now()};S.dlg=0;S.sd=null;S.tr=0;S.mg=0;mv.x=mv.k=null;sfx('door');render()}
+function setScene(n,from){const prev=from||SCENE;SCENE=n;sceneT=performance.now();S.dlg=0;S.tr=0;S.mg=0;S.sd=null;S.tmsg='';S.stip='';for(const k in HS)delete HS[k];Object.assign(HS,SCENES[n]||HALL);const en=ENTRY[n]||ENTRY.hall,sp=en[prev]||en.d;wiz.x=sp[0];wiz.y=sp[1];vel.x=vel.y=0;coins=[];S.cols.forEach((c,i)=>{c.x=wiz.x+220+i*40;c.y=wiz.y+120});mv.x=mv.k=null;unstick();render();saveGame()}
+const LBAKE=[],bk=(c,s,t,x,y)=>LBAKE.push({c,s,t,x,y});
+function bakeLabels(){LBAKE.forEach(q=>{const x=q.c.getContext('2d');x.fillStyle='#fff';x.font=q.s+'px VT323,monospace';x.textAlign='center';x.fillText(q.t,q.x,q.y)});for(const k in BL)delete BL[k]}
 const yc=document.createElement('canvas');yc.width=1318;yc.height=1312;
 (function(){const o=g;g=yc.getContext('2d');const U=6,r=(x,y,w,h,c)=>rc(x*U,y*U,w*U,h*U,c);
  for(let y=0;y<86;y++)r(0,y,220,1,'rgb('+(10+y/5|0)+','+(12+y/4|0)+','+(40+y*.7|0)+')');
@@ -541,7 +612,7 @@ const yc=document.createElement('canvas');yc.width=1318;yc.height=1312;
  r(0,106,220,22,'#2a3050');for(let x=0;x<220;x+=6)r(x,106+(x%12?6:0),5,4,'#34406a');
  r(45,38,66,70,'#3c3f5e');for(let y=40;y<108;y+=5)r(45,y,66,1,'#2c2f4a');r(41,30,74,10,'#5a1a2a');r(51,24,54,8,'#5a1a2a');r(74,40,8,8,'#ffd166');[52,70,92].forEach(x=>r(x,62,9,12,'#ffcc66'));r(72,86,12,22,'#2a1608');r(60,78,36,6,'#8a1a1a');
  r(125,44,62,64,P.wd);for(let y=46;y<108;y+=4)r(125,y,62,1,P.dk);r(121,36,70,10,'#2a5a3a');r(131,30,50,8,'#2a5a3a');[132,168].forEach(x=>r(x,58,12,14,'#ffcc66'));r(150,86,12,22,'#2a1608');r(138,78,36,6,'#2a7a4a');
- g.fillStyle='#fff';g.font='38px VT323,monospace';g.textAlign='center';g.fillText('TAX OFFICE',468,495);g.fillText('BUSINESS',936,495);
+ g.fillStyle='#fff';g.font='38px VT323,monospace';g.textAlign='center';bk(yc,38,'TAX OFFICE',468,495);bk(yc,38,'BUSINESS',936,495);
  r(8,150,70,2,'#222');for(let x=8;x<78;x+=5)r(x,146,1,8,'#222');for(let i=0;i<6;i++){r(14+i*10,158+(i%2)*6,6,10,'#6a6f8a');r(16+i*10,155+(i%2)*6,2,3,'#6a6f8a')}
  [[20,60],[205,66]].forEach(q=>{r(q[0],q[1],3,30,'#0a0812');r(q[0]-8,q[1]+6,9,2,'#0a0812');r(q[0]+3,q[1]+10,10,2,'#0a0812');r(q[0]-5,q[1]+2,2,6,'#0a0812')});
  r(0,90,10,38,'#3a3a5a');r(2,96,6,32,'#0a0812');r(110,168,32,16,'#5a3a22');r(108,162,36,6,P.red);for(let x=108;x<144;x+=8)r(x,162,4,6,'#f4ecd8');
@@ -551,8 +622,14 @@ function payDown(){if(S.cash<200)return;let a=200;S.cash-=200;S.paid+=200;S.liab
  for(let j=0;a>0&&j<S.liab.length;){const l=S.liab[j],q=Math.min(l.b,a);l.b-=q;a-=q;if(l.b<=0){logit('Paid off '+l.n+'!');S.liab.splice(j,1)}else j++}
  if(a>0){S.cash+=a;S.paid-=a}logit('Paid $'+(200-a)+' toward debts.');render()}
 function closeMg(){S.mg=0;S.dlg=0;render()}
+function closeMs(){S.ms=null;S.dlg=0;render()}
+function showMs(){const m=S.ms;if(!m)return;const net=m.f;
+ E('card').innerHTML='<div class="ms"><div class="tag">Month '+m.m+' closed</div><h3>'+(net>=0?'Ahead by ':'Behind by ')+$(Math.abs(net))+' this month</h3>'
+ +row('Wizard wage','+'+$(m.w),'pos')+row('Passive income','+'+$(m.p),'pos')+row('Bills and payments','-'+$(m.x),'neg')+row('<b>Cashflow</b>','<b>'+(net>=0?'+':'')+$(net)+'</b>',net>=0?'pos':'neg')
+ +(m.lines.length?'<div class="mute" style="margin-top:8px">What happened</div>'+m.lines.map(l=>'<div class="li"><span>'+l+'</span></div>').join(''):'')
+ +'<div class="lesson"><b>Rich Dad lesson.</b> '+S.lesson+'</div><button onclick="closeMs()">On to month '+(S.inf?S.m:Math.min(S.m,S.maxM))+'</button></div>'}
 function tasks(){const biz=!!S.biz;return[['debt','Pay $200 toward your debts (Tax Office, bank or vault)',60,S.paid>=200,S.liab.length>0||S.od>0||S.paid>=200],['biz','Manage your business at the Business Office',80,S.managed,biz],['coin','Collect 3 glowing coins',30,S.coinsM>=3,true]]}
-function hudTasks(){const T=tasks();T.forEach(q=>{if(q[3]&&!S.tk[q[0]]){S.tk[q[0]]=1;S.cash+=q[2];E('cash').textContent=$(S.cash);logit('Task done: +'+$(q[2]));pop('Task done +'+$(q[2]),'#7fe0a0',wiz.x,wiz.y-300);burst(wiz.x,wiz.y-120);sfx('coin')}});
+function hudTasks(){const T=tasks();T.forEach(q=>{if(q[3]&&!S.tk[q[0]]){S.tk[q[0]]=1;S.cash+=q[2];logit('Task done: +'+$(q[2]));pop('Task done +'+$(q[2]),'#7fe0a0',wiz.x,wiz.y-300);burst(wiz.x,wiz.y-120);sfx('coin')}});
  E('tasks').innerHTML=T.filter(q=>q[4]).map(q=>'<div class="li"><span>'+(q[3]?'[x] ':'[ ] ')+q[1]+'</span><span class="pos">+'+$(q[2])+'</span></div>').join('')}
 DEALS.forEach(d=>d.i=Math.round(d.i*1.6/10)*10);
 let mstep=0,mus=null;const MS=[220,246.9,261.6,293.7,329.6,349.2,415.3,440,523.3],MEL=[0,2,4,2,5,4,2,1,0,2,4,7,5,4,3,1];
@@ -566,7 +643,7 @@ YARD.trade={x:450,y:1120,n:'Trading Post',d:'Trade gold dust, crystals, dragon s
 (function(){const o=g;g=yc.getContext('2d');const U=6,r=(x,y,w,h,c)=>rc(x*U,y*U,w*U,h*U,c);
  r(60,160,3,22,'#3a2410');r(87,160,3,22,'#3a2410');r(56,143,38,18,'#1f3a2e');r(56,143,38,2,P.wd);r(56,159,38,2,P.wd);r(58,137,34,6,P.red);for(let x=58;x<92;x+=8)r(x,137,4,6,'#f4ecd8');
  r(70,162,8,8,'#7a50c8');r(72,160,4,2,'#d8c0ff');[[62,148,'#7fe0a0'],[62,152,'#ffd166'],[62,156,'#ff8ad0'],[80,148,'#ff8a70'],[80,152,'#6fb8ff']].forEach(q=>r(q[0],q[1],10,1,q[2]));
- g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';g.fillText('TRADING POST',450,818);g=o})();
+ g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';bk(yc,34,'TRADING POST',450,818);g=o})();
 // ===== Trading Post =====
 const CM=[['GLD','Gold Dust',100,.06],['MCR','Moon Crystals',60,.12],['DRG','Dragon Scales',250,.18],['SPL','Spell Scrolls',30,.09],['GPR','Ghost Pepper',15,.25]];
 function mkInit(){S.px={};S.hist={};S.port={};CM.forEach(c=>{S.px[c[0]]=c[2];S.hist[c[0]]=[c[2]];S.port[c[0]]={q:0,c:0}})}
@@ -588,23 +665,23 @@ E('lvs').innerHTML=LVD.map((d,i)=>'<button class="lv" onclick="start('+i+')"><sp
 let popup='';
 // ===== Staff & stalls =====
 let stf=-1;
-function resetWorld(){SCENE='hall';sceneT=performance.now();for(const k in HS)delete HS[k];Object.assign(HS,HALL);wiz.x=SP0.x;wiz.y=SP0.y;mv.x=null;near='';stf=-1;coins=[];gob=null;parts=[];fxs=[];closePop();unstick()}
+function resetWorld(){SCENE='hall';sceneT=performance.now();for(const k in HS)delete HS[k];Object.assign(HS,HALL);wiz.x=SP0.x;wiz.y=SP0.y;mv.x=mv.k=null;vel.x=vel.y=0;near='';stf=-1;coins=[];gob=null;parts=[];fxs=[];closePop();unstick()}
 HALL.mine.ex=1010;HALL.mine.ey=930;
 const E3=[['Buy Bread $15','eat0'],['Buy Stew $40','eat1'],['Buy Feast $90','eat2']];
 const STAFF=[
-{sc:'hall',x:350,y:520,k:5,n:'Mabel',r:'Innkeeper',say:'Welcome, dear. Sleeping here ends the month and brings your pay.',svc:[['Sleep and collect pay','sleep']],tips:['Pay yourself first, before bills and treats.','Rest, then plan your next asset purchase.','A budget is a plan for your gold, not a cage.']},
+{sc:'hall',x:350,y:520,k:5,n:'Mabel',r:'Innkeeper',say:'Welcome, dear. Sleeping here ends the month and brings your pay. Snoring is extra.',svc:[['Sleep and collect pay','sleep']],tips:['Pay yourself first, before bills and treats.','Rest, then plan your next asset purchase.','A budget is a plan for your gold, not a cage.']},
 {sc:'hall',x:900,y:610,k:1,n:'Orla',r:'Brewmaster',say:'The cauldron never rests. A good business works while you sleep.',svc:[['Check my potion businesses','st:shop']],tips:['A business is only an asset if it runs without you.','Hire managers, build systems, then buy the next one.','Neglected businesses lose income. Visit the Business Office each month.']},
 {sc:'hall',x:150,y:760,k:2,n:'Thistle',r:'Librarian',say:'Shh! Knowledge is the best investment, and it pays forever.',svc:[['Check my royalties','st:lib']],tips:['Royalties pay you again and again for work you did once.','Learn before you buy. Read the numbers twice.','Payback time is cost divided by monthly income.']},
-{sc:'hall',x:300,y:1080,k:3,n:'Grim',r:'Banker',say:'Debts and deposits, all under one roof. What do you need?',svc:[['Open wizard actions','acts']],tips:['Good debt buys assets. Bad debt buys doodads.','Credit card interest eats your gold. Pay it off first.','Borrow only when the asset pays more than the loan costs.']},
-{sc:'hall',x:470,y:930,k:4,n:'Bram',r:'Cook',say:'Hot food for hungry wizards! An empty stomach ends every adventure.',svc:E3,tips:['Food is a cost of living. Cook cheap, eat well.','Do not confuse treats with needs.']},
+{sc:'hall',x:300,y:1080,k:3,n:'Grim',r:'Banker',say:'Debts and deposits, all under one roof. The roof is also a deposit. What do you need?',svc:[['Open wizard actions','acts']],tips:['Good debt buys assets. Bad debt buys doodads.','Credit card interest eats your gold. Pay it off first.','Borrow only when the asset pays more than the loan costs.']},
+{sc:'hall',x:470,y:930,k:4,n:'Bram',r:'Cook',say:'Hot food for hungry wizards! An empty stomach ends every adventure, usually face first.',svc:E3,tips:['Food is a cost of living. Cook cheap, eat well.','Do not confuse treats with needs.']},
 {sc:'hall',x:440,y:730,k:5,n:'Fern',r:'Gardener',say:'Magic gardens grow rent every month. Patient gold grows best.',svc:[['Check my gardens','st:garden']],tips:['Real estate pays rent while it grows in value.','Never put all your gold in one garden.','Tenants pay your bills when you own the land.']},
 {sc:'hall',x:1050,y:960,k:1,n:'Glitz',r:'Doodad Merchant',say:'Psst! Half price today only! You deserve it!',svc:[['Hear my sales pitch','pitch']],tips:['If it pays you nothing, it is a doodad.','Wait a week. If you still want it, buy it from your income.']},
 {sc:'hall',x:1040,y:1080,k:2,n:'Dusty',r:'Mine Foreman',say:'Dig deep, wizard. Shares in the mine pay dividends every month.',svc:[['Check my mine shares','st:mine']],tips:['Stock prices swing. Dividends keep paying through it.','Diversify. A crash can halve one mine overnight.']},
 {sc:'hall',x:940,y:790,k:3,n:'Warden Vlad',r:'Gatekeeper',say:'Beyond this gate lie the Tax Office, the Trading Post and worse.',svc:[['Go through the gate','gate']],tips:['The tax wizards only chase those who owe.','Pay a little debt every month and sleep soundly.']},
-{sc:'yard',x:560,y:750,k:4,n:'Madame Levy',r:'Tax Collector',say:'Debts do not vanish, dear. They only grow. Shall we settle some?',svc:[['Pay $200 toward debts','pay200'],['Open wizard actions','acts']],tips:['Overdue debt grows 5% a month. Pay it first.','Small regular payments beat one big panic.']},
+{sc:'yard',x:560,y:750,k:4,n:'Madame Levy',r:'Tax Collector',say:'Debts do not vanish, dear. They only grow. Like mould, but with paperwork. Shall we settle some?',svc:[['Pay $200 toward debts','pay200'],['Open wizard actions','acts']],tips:['Overdue debt grows 5% a month. Pay it first.','Small regular payments beat one big panic.']},
 {sc:'yard',x:1020,y:750,k:1,n:'Mr. Pennington',r:'Business Manager',say:'Your businesses need attention. Shall we look at the books?',svc:[['Manage my business','manage']],tips:['Delegating to a manager buys back your time.','Reinvest profits into the next asset.']},
-{sc:'yard',x:540,y:1140,k:2,n:'Quill',r:'Trader',say:'Prices dance like ghosts. Buy low, sell high, and mind the fees.',svc:[['Open the Trading Post','trade']],tips:['Never trade with gold you cannot afford to lose.','Ghost Pepper swings wildly. Gold Dust is calmer.','Spread your risk across several goods.']},
-{sc:'yard',x:820,y:1110,k:5,n:'Old Nan',r:'Cart Cook',say:'Stew for the road! Nothing beats a hot bowl at midnight.',svc:E3,tips:['Eat before you are starving, not after.']},
+{sc:'yard',x:540,y:1140,k:2,n:'Quill',r:'Trader',say:'Prices dance like ghosts. Buy low, sell high, and mind the fees. Mostly the fees.',svc:[['Open the Trading Post','trade']],tips:['Never trade with gold you cannot afford to lose.','Ghost Pepper swings wildly. Gold Dust is calmer.','Spread your risk across several goods.']},
+{sc:'yard',x:820,y:1110,k:5,n:'Old Nan',r:'Cart Cook',say:'Stew for the road! I will not say what is in it, and you will not ask.',svc:E3,tips:['Eat before you are starving, not after.']},
 {sc:'yard',x:330,y:1070,k:3,n:'Hollow',r:'Gravekeeper',say:'These graves hold the gold of folk who ignored their debts...',svc:[],tips:['Debt haunts those who ignore it.','Liabilities take gold out of your pocket. Assets put it in.']},
 {sc:'yard',x:140,y:770,k:4,n:'Sir Rook',r:'Gate Guard',say:'The hall is warm and safe. Back inside, wizard?',svc:[['Return to the hall','gate']],tips:['Keep an eye out for glowing coins on the floor.']}];
 function nearStaff(){let b=-1,m=140;STAFF.forEach((f,i)=>{if(f.sc!==SCENE)return;const d=Math.hypot(wiz.x-f.x,wiz.y-f.y);if(d<m){m=d;b=i}});return b}
@@ -617,7 +694,7 @@ function svcDo(k){const m=k.match(/^eat(\d)/);
  if(k==='pay200'){payDown();return}
  if(k==='trade'){S.sd=null;S.tr=1;S.tmsg='';render();return}
  if(k==='manage'){S.sd=null;S.mg=1;render();return}
- if(k==='gate'){closeStaff();setScene(SCENE==='hall'?'yard':'hall');return}
+ if(k==='gate'){closeStaff();goScene(SCENE==='hall'?'yard':'hall');return}
  if(k==='pitch'){S.stip='Look at this sparkle! Only today, only for you! Everyone has one. (Remember: if it pays you nothing, it is a doodad.)';render();return}
  if(k.startsWith('st:')){const l=k.slice(3),a=S.assets.filter(x=>l==='shop'?x.t==='Business':x.l===l),inc=a.reduce((q,x)=>q+x.i,0);S.stip=a.length?'You own '+a.length+' here, paying '+$(inc)+' a month, worth about '+$(a.reduce((q,x)=>q+x.val,0))+'.':'You own nothing here yet. Look out for street deals and visitors with a !.';render()}}
 const SHORTG=['Save $5,000 and keep treats under $300 for 6 months.','Reach $600 passive income and $800 savings.','Reach $1,100 a month in passive income.','Reach $1,300 passive income and keep 3 months of bills saved.','Set your own goal (press G).'];
@@ -628,13 +705,13 @@ function fxPost(t){if(performance.now()<fwUntil){if(Math.random()<.12)burst(150+
  parts=parts.filter(q=>q.l>0);parts.forEach(q=>{q.x+=q.vx;q.y+=q.vy;q.vy+=.7;q.l--;G.fillStyle=q.c;G.fillRect(q.x,q.y,9,9)});
  const ob=objective();if(ob[1]===SCENE&&!S.dlg&&!S.over){const bx=ob[2],by=ob[3]-250+Math.sin(t/200)*10;G.fillStyle='#ffd166';G.strokeStyle='#1a0e05';G.lineWidth=6;G.beginPath();G.moveTo(bx-26,by-30);G.lineTo(bx+26,by-30);G.lineTo(bx,by+8);G.closePath();G.stroke();G.fill()}}
 function gobTick(t,dt){
- if(!gob&&t>nextGob&&!S.dlg){nextGob=t+40000+Math.random()*30000;gob={x:wiz.x+(Math.random()<.5?-600:600),y:wiz.y+(Math.random()-.5)*200,sc:SCENE,ph:0};if(!walk(gob.x,gob.y)){gob.x=wiz.x+200;gob.y=wiz.y+150}pop('A goblin grabbed a coin pouch! Catch him!','#ff8a70',wiz.x,wiz.y-300);sfx('ghost')}
- if(!gob)return;if(gob.sc!==SCENE){gob=null;return}
+ if(!gob&&t>nextGob&&!S.dlg){nextGob=t+40000+Math.random()*30000;gob={x:wiz.x+(Math.random()<.5?-600:600),y:wiz.y+(Math.random()-.5)*200,sc:SCENE,ph:0};if(!walk(gob.x,gob.y)){gob.x=wiz.x+200;gob.y=wiz.y+150}pop('A goblin grabbed your coin pouch and is giggling about it. Catch him!','#ff8a70',wiz.x,wiz.y-300);sfx('ghost')}
+ if(!gob)return;if(gob.sc!==SCENE){gob=null;return}if(S.dlg)return;
  const dx=wiz.x-gob.x,dy=wiz.y-gob.y,d=Math.hypot(dx,dy)||1,nx=gob.x-dx/d*200*dt,ny=gob.y-dy/d*200*dt;
  if(walk(nx,ny)){gob.x=nx;gob.y=ny}else if(walk(nx,gob.y))gob.x=nx;else if(walk(gob.x,ny))gob.y=ny;
  gob.ph+=dt;
- if(d<75){S.cash+=60;pop('Caught the goblin! +$60','#7fe0a0',wiz.x,wiz.y-280);burst(wiz.x,wiz.y-120);sfx('coin');gob=null}
- else if(gob.ph>14){S.cash=Math.max(0,S.cash-40);pop('The goblin escaped with $40!','#ff8a70',wiz.x,wiz.y-280);gob=null}}
+ if(d<75){S.cash+=60;pop('Caught the goblin! +$60 (he had a tip jar)','#7fe0a0',wiz.x,wiz.y-280);burst(wiz.x,wiz.y-120);sfx('coin');gob=null}
+ else if(gob.ph>14){S.cash=Math.max(0,S.cash-40);shakeT=performance.now()+300;sfx('hurt');pop('The goblin escaped with $40 and your dignity!','#ff8a70',wiz.x,wiz.y-280);gob=null}}
 function objective(){const c=S.card,T=tasks(),M=SCN[SCENE]||SCN.hall,G2=HS.gate||{x:wiz.x,y:wiz.y},back=t=>[t,SCENE,G2.x,G2.y];
  if(c&&c.opts&&S.enc)return S.enc.sc===SCENE?['Talk to the visitor with the !'+(SCENE==='hall'&&HALL[c.loc]?' ('+HALL[c.loc].n+')':''),SCENE,S.enc.x,S.enc.y]:back('Go to the '+(SCN[S.enc.sc]||SCN.hall).n+' to meet the visitor');
  if(S.hun<35)return['You are hungry. Eat at the '+M.food[0],SCENE,M.food[1],M.food[2]];
@@ -643,8 +720,8 @@ function objective(){const c=S.card,T=tasks(),M=SCN[SCENE]||SCN.hall,G2=HS.gate|
  if(!T[2][3]){const q=coins[0];return['Collect 3 glowing coins ('+S.coinsM+'/3)',SCENE,q?q.x:wiz.x,q?q.y:wiz.y]}
  if((S.lv>0||S.inf)&&!S.assets.length&&S.cash>=800)return M.stall?['Buy your first asset at the '+M.stall[0],SCENE,M.stall[1],M.stall[2]]:back('Go outside to the market stalls to buy an asset');
  return M.bed?['Sleep '+M.bed[0]+' to end the month',SCENE,M.bed[1],M.bed[2]]:back('Return to the hall and sleep to end the month')}
-function tipText(){const ob=objective();return'<b class="pos">Next: '+ob[0]+'</b>'+(S.lesson?'<br><span class="mute">Lesson: '+S.lesson+'</span>':'')+(near&&near!=='enc'&&HS[near]?'<br><b>'+HS[near].n+'.</b> '+HS[near].d:'')+hint()}
-function closePop(){popup='';E('pop_acts').style.display='none';E('pop_trk').style.display='none';E('pop_goal').style.display='none';E('pop_world').style.display='none';document.querySelector('.grid').classList.remove('open')}
+function tipText(){const ob=objective();return'<b class="pos">Next: '+ob[0]+'</b>'+hint()}
+function closePop(){popup='';E('pop_acts').style.display='none';E('pop_goal').style.display='none';E('pop_world').style.display='none';document.querySelector('.grid').classList.remove('open')}
 function openPop(id){if(titleUp||menu)return;if(popup===id){closePop();return}closePop();popup=id;if(id==='led')document.querySelector('.grid').classList.add('open');else{if(id==='goal')gPick('play');if(id==='world')drawWorld();E('pop_'+id).style.display='flex'}render()}
 STAFF.splice(0,STAFF.length,...STAFF.filter(f=>!['Orla','Thistle','Fern','Glitz','Dusty','Hollow','Sir Rook'].includes(f.n)));
 STAFF.push(
@@ -654,14 +731,14 @@ STAFF.push(
 {sc:'yard',x:1190,y:940,k:4,n:'Bea',r:'Bond and Royalty Clerk',cat:'sv',stall:'Savings',say:'Safe, steady income. Bonds and royalties, nice and calm.',svc:[],tips:['Bonds are safer but pay less.','Royalties pay again and again for work you did once.']});
 STAFF.push(
 {sc:'harbor',x:520,y:760,k:9,n:'Captain Moira',r:'Harbormaster',say:'Welcome to the Moonlit Harbor, wizard. The hammock is yours when the month is done.',svc:[['Sleep and collect pay','sleep']],tips:['Ships that never sail earn nothing. Neither does idle gold.','Chart a goal, then steer toward it every month. Press G.','A harbor is a safety net. So is an emergency fund.']},
-{sc:'harbor',x:780,y:740,k:6,n:'Shade',r:'Smuggler',say:'Night prices, friend. Buy low, sell high, ask no questions.',svc:[['Open the Trading Post','trade']],tips:['Fees and taxes take a bite of every trade.','Only trade what you can afford to lose.']},
+{sc:'harbor',x:780,y:740,k:6,n:'Shade',r:'Smuggler',say:'Night prices, friend. Buy low, sell high, ask no questions. Especially not about the fish.',svc:[['Open the Trading Post','trade']],tips:['Fees and taxes take a bite of every trade.','Only trade what you can afford to lose.']},
 {sc:'harbor',x:300,y:900,k:11,n:'Pearl',r:'Dock Broker',cat:'st',stall:'Stocks',say:'Shares fresh off the boat. Dividends every month, if the mine holds.',svc:[],tips:['Dividends pay through the storms. Prices do not.','Guaranteed returns are a pirate\'s promise.']},
-{sc:'harbor',x:660,y:900,k:0,n:'Finn',r:'Shipping Broker',cat:'bz',stall:'Business',say:'A business that sails without you aboard is the finest ship there is.',svc:[],tips:['Hire a captain, then buy another ship.','Reinvest profits into the next asset.']},
-{sc:'harbor',x:760,y:1180,k:12,n:'Salty Sam',r:'Fish Cook',say:'Moonfish, hot off the grill! Eat before the tide turns.',svc:E3,tips:['Eat before you are starving, not after.']});
+{sc:'harbor',x:660,y:900,k:5,n:'Finn',r:'Shipping Broker',cat:'bz',stall:'Business',say:'A business that sails without you aboard is the finest ship there is.',svc:[],tips:['Hire a captain, then buy another ship.','Reinvest profits into the next asset.']},
+{sc:'harbor',x:760,y:1180,k:12,n:'Salty Sam',r:'Fish Cook',say:'Moonfish, hot off the grill! It glows a little. That is normal. Probably.',svc:E3,tips:['Eat before you are starving, not after.']});
 function spawnStalls(){S.stock={re:[],st:[],bz:[],sv:[]};if(S.lv===0&&!S.inf)return;const pools={re:d=>d.t==='Magic garden',st:d=>d.t==='Gold mine',bz:d=>d.t==='Business',sv:d=>d.t==='Bonds'||d.t==='Royalties'};
  for(const k in pools){const pool=DEALS.filter(d=>pools[k](d)&&(S.lv!==1||d.c<=6000)).sort(()=>Math.random()-.5).slice(0,3);
   S.stock[k]=pool.map(b=>{const c=Math.round(b.c*(.9+Math.random()*.25)/10)*10;let inc=Math.round(b.i*(.92+Math.random()*.2)/10)*10,scam=false,nm=b.n;if(k==='st'&&S.lv>=2&&Math.random()<.35){scam=true;nm='Sure-Thing '+b.n.split(' ')[0]+' Fund';inc=Math.round(c*.2/10)*10}return{n:nm,t:scam?'Gold mine':b.t,l:scam?'mine':b.l,c,i:inc,d:b.d,scam}})}}
-function buyStall(k,i){const d=S.stock[k][i];if(!d||S.cash<d.c)return;S.cash-=d.c;S.assets.push({n:d.n,t:d.t,l:d.l,v:d.c,val:d.c,i:d.i,exp:d.scam?S.m+3:0});S.stock[k].splice(i,1);logit('Bought '+d.n+' (+'+$(d.i)+'/mo).');S.stip='You bought '+d.n+'. Payback is about '+Math.round(d.c/d.i)+' months. Always check the numbers and who stands behind a deal.';burst(wiz.x,wiz.y-120);sfx('coin');render()}
+function buyStall(k,i){const d=S.stock[k][i];if(!d||S.cash<d.c)return;S.cash-=d.c;S.assets.push({n:d.n,t:d.t,l:d.l,v:d.c,val:d.c,i:d.i,exp:d.scam?S.m+3:0});S.stock[k].splice(i,1);logit('Bought '+d.n+' (+'+$(d.i)+'/mo).');S.stip='You bought '+d.n+'. Payback is about '+Math.round(d.c/d.i)+' months. Always check the numbers and who stands behind a deal.';burst(wiz.x,wiz.y-120);sfx('buy');render()}
 function showStaff(){const f=STAFF[S.sd];if(!f)return;const L=f.cat?(S.stock&&S.stock[f.cat]||[]):[];
  E('card').innerHTML='<canvas id="pt" width="24" height="42" style="width:72px;float:left;margin-right:10px;image-rendering:pixelated"></canvas><div class="tag">'+f.r+(f.stall?' · '+f.stall:'')+'</div><h3>'+f.n+'</h3><p>'+(S.stip||f.say)+'</p>'
  +(f.cat==='bz'?bizStall():f.cat?(S.lv===0&&!S.inf?'<p class="mute">Closed on this level. Learn to budget first!</p>':L.length?L.map((d,i)=>'<div class="li" style="align-items:center;gap:8px"><span style="flex:1"><b>'+d.n+'</b><br><span class="mute">'+d.d+'<br>Pays +$'+d.i+'/mo, payback about '+Math.round(d.c/d.i)+' months ('+pbTag(d.c/d.i)+', usual 12 to 30)'+(d.scam?'. "GUARANTEED returns!"':'')+'</span></span><button '+(S.cash<d.c?'disabled':'')+' onclick="buyStall(\''+f.cat+'\','+i+')">Buy '+$(d.c)+'</button></div>').join(''):'<p class="mute">Sold out this month. Come back next month!</p>'):'')
@@ -684,7 +761,7 @@ function bizCalc(){const b=S.biz;if(!b)return{rev:0,cost:0,profit:0};
 function pickBizEv(){const b=S.biz;if(!b)return;let i;do{i=R(0,BEV.length-1)}while(i===7&&b.staff===0&&Math.random()<.9);b.ev=i;b.evDone=false;b.evMsg=''}
 function bizMonthEnd(){const b=S.biz;if(!b)return;const c=bizCalc();b.last=c;b.rep=Math.max(0,Math.min(100,b.rep+(b.sup?2:-1)+(b.staff>=1||b.gm?2:-3)+(b.price===0?1:b.price===2?-1:0)+(S.managed?1:-3)));b.mod=0;b.extra=0;
  if(c.profit<0){b.bad++;logit('Your business lost '+$(-c.profit)+' this month.')}else b.bad=0;if(b.bad>=3)logit('Your business is failing. Change your plan or sell.');pickBizEv()}
-function startBiz(id){const t=BT.find(x=>x.id===id);if(!t||S.biz||S.cash<t.c)return;S.cash-=t.c;S.biz={id,t:t.t,base:t.base,fixed:t.fixed,cost0:t.c,rep:50,staff:0,price:1,sup:0,mkt:0,gm:false,mod:0,extra:0,wage:350,last:null,ev:null,evDone:false,evMsg:'',bad:0};pickBizEv();S.managed=false;S.bz=-.2;S.stip='You started '+t.t+'! Visit the Business Office every month to make decisions. A business only works if you work on it.';logit('Started '+t.t+'.');burst(wiz.x,wiz.y-120);sfx('coin');render()}
+function startBiz(id){const t=BT.find(x=>x.id===id);if(!t||S.biz||S.cash<t.c)return;S.cash-=t.c;S.biz={id,t:t.t,base:t.base,fixed:t.fixed,cost0:t.c,rep:50,staff:0,price:1,sup:0,mkt:0,gm:false,mod:0,extra:0,wage:350,last:null,ev:null,evDone:false,evMsg:'',bad:0};pickBizEv();S.managed=false;S.bz=-.2;S.stip='You started '+t.t+'! Visit the Business Office every month to make decisions. A business only works if you work on it.';logit('Started '+t.t+'.');burst(wiz.x,wiz.y-120);sfx('buy');render()}
 function sellBiz(){const b=S.biz;if(!b)return;const v=Math.round(b.cost0*.6);S.cash+=v;S.biz=null;S.bz=0;S.stip='You sold the business for '+$(v)+'. Most small businesses sell for less than you put in.';logit('Sold the business for '+$(v)+'.');render()}
 function bizStall(){if(S.lv===0&&!S.inf)return'<p class="mute">Closed on this level. Learn to budget first!</p>';
  if(S.biz)return'<p>You run <b>'+S.biz.t+'</b>. Make your monthly decisions at the Business Office.</p><button class="alt" onclick="sellBiz()">Sell the business for '+$(Math.round(S.biz.cost0*.6))+'</button>';
@@ -713,7 +790,7 @@ const OBS={yard:OBS_Y,harbor:OBS_B};
 function blocked(x,y){const O=OBS[SCENE]||OBS_H;if(O.some(r=>x>r[0]&&x<r[0]+r[2]&&y>r[1]&&y<r[1]+r[3]))return true;return STAFF.some(f=>f.sc===SCENE&&(Math.hypot(x-f.x,y-f.y)<38||(f.cat&&x>f.x-76&&x<f.x+76&&y>f.y-70&&y<f.y+8)))}
 function walk(x,y){return inPoly(x,y)&&!blocked(x,y)}
 function unstick(){if(walk(wiz.x,wiz.y))return;for(let r=20;r<500;r+=20)for(let a=0;a<6.3;a+=.5){const x=wiz.x+Math.cos(a)*r,y=wiz.y+Math.sin(a)*r;if(walk(x,y)){wiz.x=x;wiz.y=y;return}}}
-const KMAP={Mabel:5,Bram:11,Grim:3,'Warden Vlad':7,'Madame Levy':10,'Mr. Pennington':1,Quill:2,'Old Nan':12,Marlo:8,Rudy:9,Tilda:4,Bea:0};
+const KMAP={Mabel:5,Bram:11,Grim:3,'Warden Vlad':7,'Madame Levy':10,'Mr. Pennington':1,Quill:2,'Old Nan':12,Marlo:8,Rudy:9,Tilda:4,Bea:7};
 STAFF.forEach(f=>{if(KMAP[f.n]!=null)f.k=KMAP[f.n]});
 const LESSONS=['Compound interest: money earns interest on its interest. Start early.','Pay yourself first: save before you spend.','Inflation makes everything cost more, so idle cash loses value.','Diversify: never put all your gold in one place.','Good credit lowers what loans cost you.','Insurance turns a disaster into a small, predictable bill.','An emergency fund of 3 to 6 months of bills lets you sleep at night.','Taxes shrink returns. Keep what you earn after tax in mind.','Assets feed you. Liabilities eat you.','If it sounds too good to be true, it is.','Fees are small each time but large over many years.','A raise means little if your spending rises with it.'];
 function dep(n){if(n>0&&S.cash>=n){S.cash-=n;S.sav+=n}else if(n<0&&S.sav>=-n){S.sav+=n;S.cash-=n}render()}
@@ -721,17 +798,42 @@ function toggleIns(){S.ins=!S.ins;logit(S.ins?'Insurance bought. It pays most of
 let soundOn=true,profile='Wizard',lastSave=0;try{soundOn=localStorage.getItem('cc_sound')!=='off';profile=localStorage.getItem('cc_profile')||'Wizard'}catch(e){}
 E('pname').value=profile;E('snd').textContent='Sound: '+(soundOn?'On':'Off');
 function muteToggle(){soundOn=!soundOn;try{localStorage.setItem('cc_sound',soundOn?'on':'off')}catch(e){}if(soundOn){audio();if(AC)AC.resume()}else if(AC)AC.suspend();E('snd').textContent='Sound: '+(soundOn?'On':'Off')}
-const SKIP=['card','enc','dlg','sd','tr','mg','vcur','stip','tmsg'];
+const SKIP=['card','enc','dlg','sd','tr','mg','ms','vcur','stip','tmsg'];
 const sk=()=>'cc_save_'+profile;
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function saveGame(){if(!S||S.over||titleUp)return;try{localStorage.setItem(sk(),JSON.stringify({v:1,hero,scene:SCENE,wx:wiz.x,wy:wiz.y,t:Date.now(),S:JSON.parse(JSON.stringify(S,function(k,v){return this===S&&SKIP.includes(k)?undefined:v}))}))}catch(e){}}
 function loadInfo(){try{return JSON.parse(localStorage.getItem(sk()))}catch(e){return null}}
-function continueGame(){const d=loadInfo();if(!d)return;for(const k in keys)keys[k]=0;menu=false;E('intro').style.display='none';S=d.S;hero=d.hero||0;S.dlg=0;S.card=null;S.enc=null;if(S.inf)S.maxM=Infinity;S.nwh=S.nwh||[];S.trophies=S.trophies||[];S.goalsDone=S.goalsDone||0;resetWorld();if(d.scene&&d.scene!=='hall')setScene(d.scene);wiz.x=d.wx;wiz.y=d.wy;unstick();draw();render();openTut()}
+function continueGame(){const d=loadInfo();if(!d||!d.S)return;for(const k in keys)keys[k]=0;menu=false;E('intro').style.display='none';init(d.S.lv||0);Object.assign(S,d.S);S.over=null;hero=d.hero||0;S.dlg=0;S.card=null;S.enc=null;if(S.inf)S.maxM=Infinity;S.nwh=S.nwh||[];S.trophies=S.trophies||[];S.goalsDone=S.goalsDone||0;resetWorld();if(d.scene&&d.scene!=='hall')setScene(d.scene);wiz.x=d.wx;wiz.y=d.wy;unstick();draw();render();openTut()}
 function deleteSave(){try{localStorage.removeItem(sk())}catch(e){}refreshCont()}
-function refreshCont(){const d=loadInfo();E('cont').innerHTML=d?'<button onclick="continueGame()">Continue as '+profile+': Level '+(d.S.lv+1)+(d.S.inf?' (endless)':'')+', month '+d.S.m+', '+$(d.S.cash)+'</button><button class="alt" onclick="deleteSave()">Delete save</button>':'<span class="mute">No saved game for '+profile+' yet.</span>'}
+function refreshCont(){const d=loadInfo();E('cont').innerHTML=d?'<button onclick="continueGame()">Continue as '+esc(profile)+': Level '+(d.S.lv+1)+(d.S.inf?' (endless)':'')+', month '+d.S.m+', '+$(d.S.cash)+'</button><button class="alt" onclick="deleteSave()">Delete save</button>':'<span class="mute">No saved game for '+esc(profile)+' yet.</span>'}
 addEventListener('beforeunload',saveGame);setInterval(()=>{if(S&&!S.over&&!menu&&!popup&&performance.now()-lastSave>15000){lastSave=performance.now();saveGame()}},3000);
-const TUT=[['Move around','Use the arrow keys or WASD to walk, or tap the map. Press E to talk to people and use things. Esc closes any window.'],['Meet visitors','A visitor with a glowing ! brings you a decision each month. Follow the gold arrow and the Next line under the map.'],['Earn, then sleep','Sleep on the Red Cushion, or ask Mabel, to end the month. Your pay arrives, your bills go out, and a new month begins.'],['Assets vs liabilities','Assets put gold in your pocket. Liabilities take it out. Win by making passive income cover your expenses.'],['Go outside','Through the gate: market stalls for stocks, real estate and your own business, the Trading Post, the Tax Office and the Business Office. Five areas connect in a loop: the hall, the yard, the Enchanted Forest, the Crystal Caverns and the Moonlit Harbor. Press N for the world map.'],['Stay alive','Eat at the Kitchen Table or Food Cart, pay your debts before tax wizards catch you, and chase the goblin thief.'],['Handy keys','Q actions, X expenses, L ledger, G goal, N world map, M sound, H this help. The bank sells savings and insurance.']];
+const TUT=[['Walk and press E','Arrow keys or WASD to walk, or tap the map. When a yellow E appears next to you, press E to talk, buy, eat or go through a door.'],['Follow the arrow','The gold arrow and the Next line under the map always show your one next step: meet the visitor with the !, pay a debt, eat, or buy an asset.'],['Sleep to end the month','Sleep on the Red Cushion to collect pay and pay bills. Assets put gold in your pocket, liabilities take it out. Keep an eye on hunger. L opens the ledger, G your goal, N the world map, J the story so far, H this help.']];
 let ti=0;const tutSeen=()=>{try{return localStorage.getItem('cc_tut')}catch(e){return 1}};
-function openTut(){TUT.length=7;if(S)TUT.push(['Your goal on Level '+(S.lv+1)+': '+LVN[S.lv],goalText()+' Press H any time to see this again.']);ti=0;menu=true;E('tut').style.display='flex';tutShow()}
+const STORY=[
+{t:'Chapter 1',h:'The Drafty Hall',p:['The letter arrived by bat. Your Great-Aunt Ysolde, Conjurer of the Third Circle, has passed on to the Astral Plane, and she has left you her hall. Also her kitchen, her goblin banker, and a red cushion she always insisted was load-bearing.','The hall is cold, the candles are judgmental, and a second letter is pinned to the door with a hex. It is from the Ministry of Dues. The tax wizards have noticed the hall has a new owner, and they would like to introduce themselves. They have brought forms.','The goblin at the bank slides a ledger across the counter. "Your aunt kept this for sixty years," he says. "Prove you can keep coins in a pocket, {name}, and we shall talk about making them breed." Save your gold. Watch the treats. The Rat Race starts here.'],
+w:'The goblin closes the ledger with a snap. "Sixty years," he says, "and your aunt never once saved five thousand without buying a cauldron she did not need." He hands you a key to the Outside Gate. It is cold and smells of yard.',
+l:'The goblin does not look up. "Your aunt took twelve tries," he says. "The cauldrons were a problem."'},
+{t:'Chapter 2',h:'The Goblin\'s Wager',p:['The goblin is impressed, which for a goblin means he stopped counting his teeth while you spoke. "Coins that sit still go cold," he says. "Coins that work come home with friends."','He unlocks the Outside Gate. Beyond it lies the Spooky Yard: market stalls, a Trading Post, and a Business Office whose door has been stuck since the Ague of 1402. Visitors will come with deals. Some of them are even good.','"Build an income that arrives while you sleep," says the goblin, "and I will show you what your aunt was really up to in the forest." Only the safer deals come to a Gold Grower. Enjoy that while it lasts.'],
+w:'Gold arrives at the hall now while you sleep, which the ghosts find rude. The goblin writes a note on the forest map: "She kept the good stalls past the Druid\'s Hollow. Mind the Faerie Ring. It trades fair, but it laughs."',
+l:'The Outside Gate stays open, but the goblin keeps the forest map in his drawer. "Cold coins," he says. "Try again, with warmer ones."'},
+{t:'Chapter 3',h:'The Wizards Come Knocking',p:['It happens at midnight, as these things do. Three tax wizards stand at the Hall Gate in robes the colour of unpaid invoices. The tallest unrolls a scroll. It unrolls for some time.','"Form 7-B, Assessment of Conjured Income," he reads. "Interest shall now accrue on all debts, as the ghosts are hungry. Markets shall crash when the moon is wrong. Debtors who fall behind shall be escorted to the Shadow Gaol for a stay of undetermined length."','Your aunt\'s forest hides the Druid\'s Hollow and a Faerie Ring where fortunes change hands. Below it, the Crystal Caverns glitter with mine shares. Make the hall pay for itself, {name}, before the wizards make it pay for them.'],
+w:'The three tax wizards re-roll their scroll with visible disappointment. "Form 7-B is satisfied," says the tallest, "for now." As they leave, one steals a candle. The hall feels warmer anyway.',
+l:'The tax wizards leave a form on the red cushion. It is a reminder, in triplicate, that they will be back.'},
+{t:'Chapter 4',h:'The Siege of Forms',p:['The Grand Auditor herself arrives at the Moonlit Harbor aboard a prison hulk, carrying a quill the length of an oar. She declares the Hall of Conjurers forfeit to the Ministry unless its owner can prove, in writing, that the hall sustains itself.','The roof begins to leak the week she lands. A dragon egg appears in the kitchen and will, in time, want feeding. Old friends suddenly remember your address. None of this is a coincidence, but you cannot prove that either.','To win, your passive income must cover every expense, and the vault must hold three months of gold against whatever falls on you next. Then the Auditor must sign. She hates signing.'],
+w:'The Grand Auditor reads your ledger twice, then signs with the quill the length of an oar. The ink is red, which she insists is tradition. The Hall of Conjurers is yours. The forms stop coming. Mostly.',
+l:'The Grand Auditor does not sign. She does, however, date the page, which she says is a kindness.'},
+{t:'Chapter 5',h:'After the Rat Race',p:['The forms are filed. The hall is yours by right, by deed, and by a signature the Grand Auditor claims was forged, though the quill was hers. The ghosts in the cellar have become quite friendly.','Now the maps lie open: the yard, the forest, the caverns, the harbor, and the gaol, where a few debtors still owe you a drink. There is no month limit any more. There is only the question your aunt wrote on the last page of the ledger: "How much is enough, and what will you do with the rest?"','Pick a goal, {name}. Reach it, and pick a bigger one. Or retire, and let the bats carry your legend. The tax wizards will still send cards. They are not nice cards.'],
+w:'Your aunt\'s ledger is full. On the last page, under her question, you write your answer. The bats carry it off before the ink dries. In the cellar, the ghosts raise a glass.',
+l:''}];
+let si=0,sre=0;
+function sfill(x){return x.replace(/\{name\}/g,FN[hero]||'Wizard')}
+function stCh(){return STORY[Math.min(S?S.lv:0,4)]}
+function openStory(re){if(!S)return;closePop();sre=re?1:0;si=0;menu=true;E('story').style.display='flex';storyShow()}
+function storyShow(){const c=stCh();E('stn').textContent=c.t+' · Page '+(si+1)+' of '+c.p.length;E('stt').textContent=c.h;E('stx').textContent=sfill(c.p[si]);E('stback').style.visibility=si?'visible':'hidden';E('stnext').textContent=si===c.p.length-1?(sre?'Close':'Continue'):'Next'}
+function storyGo(d){si=Math.max(0,si+d);if(si>=stCh().p.length){closeStory();return}storyShow()}
+function closeStory(){E('story').style.display='none';if(sre){sceneT=performance.now();if(!titleUp&&E('intro').style.display==='none')menu=false}else openTut()}
+function storyEnd(k){const c=stCh(),x=c&&c[k];return x?'<p class="tale">'+sfill(x)+'</p>':''}
+function openTut(){TUT.length=3;if(S)TUT.push(['Your goal on Level '+(S.lv+1)+': '+LVN[S.lv],goalText()+' Press H any time to see this again.']);ti=0;menu=true;E('tut').style.display='flex';tutShow()}
 function tutShow(){E('tutn').textContent='Step '+(ti+1)+' of '+TUT.length;E('tutt').textContent=TUT[ti][0];E('tutx').textContent=TUT[ti][1];E('tutnext').textContent=ti===TUT.length-1?'Start playing':'Next'}
 function tutGo(d){ti=Math.max(0,ti+d);if(ti>=TUT.length){closeTut();return}tutShow()}
 function closeTut(){sceneT=performance.now();E('tut').style.display='none';if(!titleUp&&E('intro').style.display==='none')menu=false;try{localStorage.setItem('cc_tut','1')}catch(e){}}
@@ -781,10 +883,10 @@ function gPick(mode,head){gMode=mode;const box=E(mode==='start'?'infset_in':'goa
  box.innerHTML=h}
 function mkGoal(){return{k:gk,v:gk==='debt'?GK.debt.f():gv,t:GK[gk].l(gv)}}
 function setGoal(){S.goal=mkGoal();logit('New goal: '+S.goal.t+'.');closePop();render()}
-function travel(n){closePop();if(n!==SCENE){setScene(n);logit('You travelled to the '+MAPS.find(m=>m[0]===n)[1]+'.')}render()}
+function travel(n){closePop();if(n!==SCENE){goScene(n);logit('You travelled to the '+MAPS.find(m=>m[0]===n)[1]+'.')}render()}
 function retire(){closePop();S.over='win';render()}
-function goEndless(){E('end').style.display='none';S.over=null;S.inf=true;S.maxM=Infinity;S.goalsDone=S.goalsDone||0;S.trophies=S.trophies||[];S.nwh=S.nwh||[];S.goal=null;logit('Endless mode: no month limit. Press G to set a goal.');draw();render();closePop();gPick('play','Endless mode unlocked. Pick a goal, or play free.');openPop('goal')}
-function goalReached(){S.goalsDone=(S.goalsDone||0)+1;(S.trophies=S.trophies||[]).push({t:S.goal.t,m:S.m-1});logit('GOAL REACHED: '+S.goal.t+'!');S.goal=null;fwUntil=performance.now()+6000;burst(wiz.x,wiz.y-120);sfx('coin');sfx('bell');closePop();gPick('play','Goal reached! Trophy '+S.goalsDone+'. Pick your next goal.');openPop('goal')}
+function goEndless(){E('end').style.display='none';S.over=null;S.endSfx=0;S.inf=true;S.maxM=Infinity;S.goalsDone=S.goalsDone||0;S.trophies=S.trophies||[];S.nwh=S.nwh||[];S.goal=null;logit('Endless mode: no month limit. Press G to set a goal.');draw();render();closePop();gPick('play','Endless mode unlocked. Pick a goal, or play free.');openPop('goal')}
+function goalReached(){S.goalsDone=(S.goalsDone||0)+1;(S.trophies=S.trophies||[]).push({t:S.goal.t,m:S.m-1});logit('GOAL REACHED: '+S.goal.t+'!');S.goal=null;fwUntil=performance.now()+6000;burst(wiz.x,wiz.y-120);sfx('win');closePop();gPick('play','Goal reached! Trophy '+S.goalsDone+'. Pick your next goal.');openPop('goal')}
 function goalText(){return S.inf?(S.goal?S.goal.t+' ('+Math.round(goalPct()*100)+'%)':'free play, press G to set one'):SHORTG[S.lv]}
 function fortune(){const c=E('nwc');if(!c||!S)return;const x=c.getContext('2d'),h=(S.nwh||[]).concat([netWorth()]),W=c.width,H=c.height;x.clearRect(0,0,W,H);x.fillStyle='#2a1a12';x.fillRect(0,0,W,H);
  const gl=S.inf&&S.goal&&S.goal.k==='nw'?S.goal.v:null,mn=Math.min(0,...h),mx=Math.max(1,...h,gl||0),r=mx-mn||1,X=i=>8+i/Math.max(1,h.length-1)*(W-16),Y=v=>H-8-(v-mn)/r*(H-16);
@@ -814,7 +916,7 @@ const hc=document.createElement('canvas');hc.width=1318;hc.height=1312;
  for(let y=58;y<130;y+=6)r(196,y,16,6,(y/6|0)%2?'#f4ecd8':'#c0392b');r(194,128,20,4,'#4a4a6a');r(198,52,12,6,'#2a2a44');r(200,47,8,5,'#ffe9a0');r(197,46,14,1,'#2a2a44');r(199,43,10,3,'#2a2a44');r(203,40,2,3,'#2a2a44');r(202,112,4,7,'#1a1a30');r(203,113,2,5,'#2a1608');
  [30,80,130].forEach(x=>{r(x,140,1,23,'#222');r(x-1,137,3,3,'#ffcc66');r(x-2,136,5,1,'#222')});
  r(100,180,1,13,'#3a2410');r(123,180,1,13,'#3a2410');for(let x=98;x<126;x+=4)r(x,178,4,3,(x/4|0)%2?'#2f8f8a':'#f4ecd8');r(100,189,24,5,'#5a3a22');r(100,189,24,1,'#8a5a2b');[[103,'#6fb8ff'],[109,'#7fe0d0'],[115,'#ff8ad0']].forEach(q=>{r(q[0],187,4,2,q[1]);r(q[0]+4,187,1,2,q[1])});r(112,174,2,4,'#222');r(111,172,4,2,'#ffcc66');
- g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';g.fillText('HARBOR VAULT',390,330);g.fillText("SMUGGLER'S MARKET",924,372);g.fillText('FISH',672,1050);g.fillText('TO THE HALL',102,390);g=o})();
+ g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';bk(hc,34,'HARBOR VAULT',390,330);bk(hc,34,"SMUGGLER'S MARKET",924,372);bk(hc,34,'FISH',672,1050);bk(hc,34,'TO THE HALL',102,390);g=o})();
 function harborFx(t){const pu=.5+.5*Math.sin(t/300);
  for(let i=0;i<34;i++){const sp=.02+nz(i,4)*.0003,x=((nz(i,9)*14+t*sp)%(WW+120))-60,y=992+nz(i,5)*3.1;if(x>500&&x<830)continue;G.fillStyle='rgba(140,190,255,'+(.12+.22*Math.sin(t/400+i))+')';G.fillRect(x,y,36+nz(i,6)%30,4)}
  for(let i=0;i<10;i++){const y=1000+i*28+Math.sin(t/500+i)*4;G.fillStyle='rgba(244,240,208,'+(.1+.12*Math.sin(t/230+i*1.7))+')';G.fillRect(1040+Math.sin(t/700+i)*14,y,60+(i%3)*14,3)}
@@ -843,12 +945,12 @@ STAFF.push(
 {sc:'gaol',x:780,y:740,k:10,n:'Quill',r:'Auctioneer',say:'Going once, going twice! Confiscated goods at prices that move all night.',svc:[['Open the Trading Post','trade']],tips:['Buy low, sell high, and mind the fees.','Other people\'s panic is a buyer\'s market.']},
 {sc:'gaol',x:300,y:900,k:8,n:'Bailiff Rook',r:'Bailiff',cat:'re',stall:'Repossessions',say:'Gardens and orchards seized from debtors. Cheap, if you can stomach it.',svc:[],tips:['A repossessed asset still pays rent. The land does not care who owns it.','Never buy more than your cashflow can carry.']},
 {sc:'gaol',x:660,y:900,k:2,n:'Marrow',r:'Bondsman',cat:'sv',stall:'Bail Bonds',say:'Bonds and royalties. Dull, steady, and nobody ever went to gaol over them.',svc:[],tips:['Bonds are safer but pay less.','Steady income is what keeps you out of the stocks.']},
-{sc:'gaol',x:760,y:1180,k:4,n:'Cook Hob',r:'Gruel Cook',say:'Gruel. Bread if you are lucky. Eat up, nobody starves on my watch.',svc:E3,tips:['Food is a cost of living. Cook cheap, eat well.']});
+{sc:'gaol',x:760,y:1180,k:4,n:'Cook Hob',r:'Gruel Cook',say:'Gruel. Bread if you are lucky. Eat up, nobody starves on my watch. Hygiene is another matter.',svc:E3,tips:['Food is a cost of living. Cook cheap, eat well.']});
 // yard: forest path at the bottom right; harbor: cave mouth under the lighthouse
 (function(){const o=g;g=yc.getContext('2d');const U=6,r=(x,y,w,h,c)=>rc(x*U,y*U,w*U,h*U,c);
  for(let x=196;x<220;x++)r(x,186+Math.round(Math.sin(x/4)*2),1,10,'#4a3a22');
  [[200,160],[211,166],[218,158]].forEach(q=>{r(q[0]+2,q[1]+10,3,22,'#231408');for(let d=-7;d<=7;d++){const w=Math.round(Math.sqrt(49-d*d)*1.2);r(q[0]+3-w,q[1]+d,2*w+1,1,'#163a22')}});
- g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';g.fillText('FOREST PATH',1230,1090);
+ g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';bk(yc,34,'FOREST PATH',1230,1090);
  g=hc.getContext('2d');r(203,138,17,25,'#3a3a5a');r(205,136,12,3,'#4a4a6a');for(let i=0;i<10;i++)r(203+(i*7)%17,139+(i*5)%22,2,2,'#2a2a44');r(208,146,9,17,'#0a0812');r(210,144,5,3,'#0a0812');r(206,152,2,5,'#6ff0ff');r(217,149,2,6,'#b388ff');g=o})();
 const fc=document.createElement('canvas');fc.width=1318;fc.height=1312;
 (function(){const o=g;g=fc.getContext('2d');const U=6,r=(x,y,w,h,c)=>rc(x*U,y*U,w*U,h*U,c);
@@ -871,7 +973,7 @@ const fc=document.createElement('canvas');fc.width=1318;fc.height=1312;
  for(let a=0;a<14;a++){const px=183+Math.round(Math.cos(a/14*6.283)*11),py=113+Math.round(Math.sin(a/14*6.283)*6);r(px,py,2,3,'#f4ecd8');r(px-1,py-1,4,2,a%2?'#ff8ad0':'#6ff0ff')}
  r(195,183,22,3,'#5a3a22');r(195,183,3,14,'#5a3a22');r(214,183,3,14,'#5a3a22');r(198,186,16,11,'#0a0812');r(205,186,1,8,'#8a5a2b');r(199,197,18,2,'#3a2410');
  r(160,184,16,8,'#5a3a22');r(158,182,20,3,'#c0392b');for(let x=158;x<178;x+=4)r(x,182,2,3,'#f4ecd8');r(162,188,3,2,'#ff8ad0');r(167,188,3,2,'#7a3ac0');r(172,188,3,2,'#ffd166');r(161,192,3,3,'#222');r(172,192,3,3,'#222');
- g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';g.fillText('TREEHOUSE',174,150);g.fillText("DRUID'S HOLLOW",690,150);g.fillText('FAERIE RING',1098,610);g.fillText('MINE SHAFT',1200,1080);g.fillText('BERRIES',955,1070);g=o})();
+ g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';bk(fc,34,'TREEHOUSE',174,150);bk(fc,34,"DRUID'S HOLLOW",690,150);bk(fc,34,'FAERIE RING',1098,610);bk(fc,34,'MINE SHAFT',1200,1080);bk(fc,34,'BERRIES',955,1070);g=o})();
 const cc=document.createElement('canvas');cc.width=1318;cc.height=1312;
 (function(){const o=g;g=cc.getContext('2d');const U=6,r=(x,y,w,h,c)=>rc(x*U,y*U,w*U,h*U,c);
  r(0,0,220,219,'#120e1c');
@@ -892,7 +994,7 @@ const cc=document.createElement('canvas');cc.width=1318;cc.height=1312;
  [[135,185,10],[145,190,7],[128,192,6]].forEach(q=>{for(let i=0;i<q[2];i++)r(q[0]-Math.floor(i/2),q[1]+i-q[2],1+i,1,i%2?'#3a3250':'#4a4260')});
  r(98,188,24,8,'#3a3250');r(104,184,12,9,'#333340');r(103,183,14,2,'#555566');r(106,181,3,2,'#f4ecd8');r(112,180,3,2,'#f4ecd8');r(106,193,8,2,'#ff9a3a');r(108,192,4,1,'#ffe9a0');
  r(193,178,26,26,'#3a3250');r(197,182,18,22,'#0a0812');r(195,178,22,4,'#5a3a22');r(195,178,3,26,'#5a3a22');r(214,178,3,26,'#5a3a22');
- g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';g.fillText('LADDER UP',108,210);g.fillText('ORE VAULT',426,320);g.fillText('GEM EXCHANGE',936,390);g.fillText('STEW',660,1060);g.fillText('TUNNEL',1236,1050);g=o})();
+ g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';bk(cc,34,'LADDER UP',108,210);bk(cc,34,'ORE VAULT',426,320);bk(cc,34,'GEM EXCHANGE',936,390);bk(cc,34,'STEW',660,1060);bk(cc,34,'TUNNEL',1236,1050);g=o})();
 const jc=document.createElement('canvas');jc.width=1318;jc.height=1312;
 (function(){const o=g;g=jc.getContext('2d');const U=6,r=(x,y,w,h,c)=>rc(x*U,y*U,w*U,h*U,c);
  for(let y=0;y<93;y++)r(0,y,220,1,'rgb('+(8+y/9|0)+','+(8+y/8|0)+','+(22+y/3|0)+')');
@@ -918,7 +1020,7 @@ const jc=document.createElement('canvas');jc.width=1318;jc.height=1312;
  [[90,46],[120,46],[36,46]].forEach(q=>{for(let y=q[1];y<q[1]+14;y+=2)r(q[0],y,1,1,'#8a8a9a')});
  [[25,86],[116,86],[183,86]].forEach(q=>{r(q[0],q[1],2,6,'#3a2410');r(q[0]-1,q[1]-1,4,2,'#5a3a22')});
  r(186,186,34,22,'#2a1a10');r(186,186,34,2,'#3a2410');for(let y=190;y<208;y+=4)r(186,y,34,1,'#1a0e05');r(200,160,2,28,'#3a2410');r(196,158,10,2,'#3a2410');r(202,164,14,16,'#4a4a5c');for(let d=0;d<8;d++)r(202,164+d*2,1,1,'#8a8a9a');r(190,172,6,6,'#07050d');r(192,172,1,6,'#8a8a9a');for(let i=0;i<10;i++)r(176+i*2,196-i,6,2,'#6b4528');
- g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';g.fillText('GAOL ROAD',102,330);g.fillText("WARDEN'S VAULT",426,320);g.fillText('AUCTION',936,360);g.fillText('CELL',1164,370);g.fillText('GRUEL',660,1060);g.fillText('HULK',1218,1090);g=o})();
+ g.fillStyle='#fff';g.font='34px VT323,monospace';g.textAlign='center';bk(jc,34,'GAOL ROAD',102,330);bk(jc,34,"WARDEN'S VAULT",426,320);bk(jc,34,'AUCTION',936,360);bk(jc,34,'CELL',1164,370);bk(jc,34,'GRUEL',660,1060);bk(jc,34,'HULK',1218,1090);g=o})();
 function gaolFx(t){for(let i=0;i<70;i++){const x=(nz(i,71)*13+t*.02*(1+nz(i,72)/200))%WW,y=(nz(i,73)*13+t*(.9+nz(i,74)/150))%HH;G.fillStyle='rgba(180,200,240,'+(.16+.08*(i%3))+')';G.fillRect(x,y,2,18)}
  [[156,516],[702,516],[1104,516]].forEach((q,i)=>{const fl=Math.sin(t/70+i*2)*3;G.fillStyle='#ff9a3a';G.beginPath();G.moveTo(q[0]-9,q[1]);G.lineTo(q[0]+fl,q[1]-28-fl*2);G.lineTo(q[0]+9,q[1]);G.closePath();G.fill();G.fillStyle='#ffe9a0';G.fillRect(q[0]-3,q[1]-10,6,8);glow(q[0],q[1]-10,120,.22+.1*Math.sin(t/90+i))});
  {const f=(t/2000)%1;ellp(300,1080,10+f*110,4+f*40,'rgba(150,170,220,'+(.35*(1-f))+')',null)}
@@ -938,7 +1040,8 @@ function caveFx(t){
   for(let k=0;k<4;k++){const f=((t/2600)+k/4)%1;G.fillStyle='rgba(200,200,220,'+(.25*(1-f))+')';G.beginPath();G.arc(fx+Math.sin(f*6+k)*18,fy-70-f*220,10+f*26,0,6.3);G.fill()}}
  for(let i=0;i<8;i++){const y=1020+i*18+Math.sin(t/600+i)*3;G.fillStyle='rgba(120,200,255,'+(.1+.1*Math.sin(t/250+i*1.3))+')';G.fillRect(120+Math.sin(t/800+i)*20,y,80+(i%3)*20,3)}
  {const f=(t/1800)%1;ellp(216,1086,10+f*120,4+f*44,'rgba(140,210,255,'+(.4*(1-f))+')',null)}}
-const FX={harbor:harborFx,forest:forestFx,cave:caveFx,gaol:gaolFx};
+function yardFx(t){for(let i=0;i<22;i++){const sp=.03+nz(i,91)*.0004,x=((nz(i,92)*13+t*sp)%(WW+80))-40,y=560+((nz(i,93)*7+t*(.02+nz(i,94)*.0002))%700),ph=Math.sin(t/300+i)*3,c=['#c8702a','#e0a030','#a84a2a','#d8c040'][i%4];G.fillStyle=c;G.fillRect(x,y+ph,7,4);G.fillRect(x+2,y+ph-2,3,2);G.fillRect(x+3,y+ph+4,3,2)}}
+const FX={harbor:harborFx,forest:forestFx,cave:caveFx,gaol:gaolFx,yard:yardFx};
 function drawWorld(){const c=E('wm');if(!c)return;const x=c.getContext('2d'),W=c.width,H=c.height;x.clearRect(0,0,W,H);x.fillStyle='#1a1838';x.fillRect(0,0,W,H);
  for(let i=0;i<60;i++){x.fillStyle='rgba(207,216,255,.5)';x.fillRect(nz(i,21)*4.4|0,nz(i,22)*2.7|0,2,2)}
  x.strokeStyle='#8a5a2b';x.lineWidth=4;x.setLineDash([8,6]);[['hall','yard'],['yard','forest'],['forest','cave'],['cave','harbor'],['harbor','hall'],['yard','gaol'],['gaol','harbor']].forEach(e=>{const a=SCN[e[0]].wm,b=SCN[e[1]].wm;x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke()});x.setLineDash([]);
@@ -970,7 +1073,8 @@ function titleFx(t){const c=E('tbg');if(!c)return;const w=Math.ceil(innerWidth/4
  for(let i=0;i<14;i++){const ph=((t/(4000+i*300))+i*.37)%1,px=nz(i,63)*w/100+Math.sin(t/600+i)*6,py=h-ph*h;x.fillStyle='rgba(255,209,102,'+(.9*(1-ph))+')';x.fillRect(px|0,py|0,2,2)}
  for(let i=0;i<2;i++){const ph=((t/7000)+i*.5)%1,bx=ph*(w+40)-20,by=h*.15+i*h*.08+Math.sin(ph*18)*10,wg=Math.sin(t/70+i)*4;x.fillStyle='#07050d';x.beginPath();x.moveTo(bx,by);x.lineTo(bx-7,by-2+wg);x.lineTo(bx-3,by+1);x.lineTo(bx,by+3);x.lineTo(bx+3,by+1);x.lineTo(bx+7,by-2+wg);x.closePath();x.fill()}
  x.fillStyle='#07050d';x.fillRect(0,h-14,w,14);for(let i=0;i<w;i+=6){const hh=4+nz(i,64)%9;x.fillRect(i,h-14-hh,6,hh)}}
-(function(){const tc=E('tcast');if(!tc)return;PLAY.slice(0,5).forEach((k,i)=>{const cx=document.createElement('canvas');cx.width=24;cx.height=42;cx.style.animationDelay=(i*.2)+'s';cx.getContext('2d').drawImage(SPR.f[k][0],0,0);tc.appendChild(cx)})})();
+(function(){const tc=E('tcast');if(!tc)return;const cs=PLAY.slice(0,5).map((k,i)=>{const cx=document.createElement('canvas');cx.width=24;cx.height=42;cx.style.animationDelay=(i*.2)+'s';cx.getContext('2d').drawImage(SPR.f[k][0],0,0);tc.appendChild(cx);return[cx,k]});setInterval(()=>{if(!titleUp)return;const [cx,k]=cs[(Math.random()*cs.length)|0],x=cx.getContext('2d');x.clearRect(0,0,24,42);x.drawImage(SPR.f[k][3],0,0);setTimeout(()=>{x.clearRect(0,0,24,42);x.drawImage(SPR.f[k][0],0,0)},160)},900)})();
+{let baked=false;const bake=()=>{if(baked)return;baked=true;bakeLabels()};if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('34px VT323'),document.fonts.load('12px "Press Start 2P"')]).then(bake,bake);setTimeout(bake,4000)}else bake()}
 init();requestAnimationFrame(tick);
 </script>
 </body>
