@@ -39,6 +39,7 @@ jobs:
         run: |
           mkdir -p dist
           cp index.html dist/
+          if [ -f mod.html ]; then cp mod.html dist/; fi
 
       - uses: actions/configure-pages@v5
 

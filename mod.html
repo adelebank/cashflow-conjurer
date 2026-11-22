@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Conjurer Moderation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#151232;--panel:#1f1b45;--line:#4a4090;--ink:#ece8ff;--mute:#a9a2d8;--gold:#f0c75e;--grn:#5fd3a0;--red:#ff8080}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:20px/1.3 VT323,monospace}
+.wrap{max-width:900px;margin:0 auto;padding:16px}
+h1{font-size:30px;color:var(--gold);margin:0 0 4px}h2{font-size:24px;color:var(--gold);margin:22px 0 8px}
+.mute{color:var(--mute)}
+button{font:inherit;background:var(--gold);color:#1a1530;border:0;padding:4px 12px;margin:0 6px 0 0;cursor:pointer}
+button.alt{background:transparent;color:var(--ink);border:2px solid var(--line)}
+button.ban{background:var(--red)}
+.card{background:var(--panel);border:2px solid var(--line);padding:10px 12px;margin:0 0 10px}
+.card .msg{font-size:24px;margin:6px 0;padding:6px 10px;background:#120e26;border-left:4px solid var(--red);overflow-wrap:anywhere}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+#tabs button{margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Moderation</h1>
+<p class="mute">Reports from The Cashflow Conjurer. Reported messages are already hidden from players. Ban a player and their account can never play again, and all their messages disappear. Dismiss a report and the message comes back.</p>
+<div id="who"></div>
+<div id="tabs" style="display:none"><button onclick="show('open')">Open reports</button><button class="alt" onclick="show('done')">Closed</button><button class="alt" onclick="show('bans')">Banned players</button><button class="alt" onclick="load()">Refresh</button></div>
+<div id="list"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+// Use the same two values as in index.html (Supabase Dashboard > Project Settings > API)
+const MP_URL='',MP_KEY='',MP_NAME_DOMAIN='players.cashflow-conjurer.app';
+const E=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]);
+const when=t=>new Date(t).toLocaleString();
+let sb=null,me=null,view='open',R=[],B=[],nick={};
+async function boot(){
+ if(!MP_URL||!MP_KEY){E('who').innerHTML='<p>Multiplayer is not set up yet. Fill in MP_URL and MP_KEY at the bottom of this file (see the README).</p>';return}
+ sb=supabase.createClient(MP_URL,MP_KEY);
+ const {data}=await sb.auth.getSession();me=data.session&&data.session.user;
+ if(!me){const st='font:inherit;background:#241610;color:#f6e6c4;border:2px solid #c98a3c;padding:3px 8px;margin:0 6px 6px 0';
+  E('who').innerHTML='<p><input id="un" placeholder="Name" autocomplete="username" style="'+st+'"><input id="pw" type="password" placeholder="Password" autocomplete="current-password" style="'+st+'"><button onclick="pwIn()">Sign in</button></p><p class="mute">or <button class="alt" onclick="signIn()">Sign in with Google</button></p><p id="err" class="mute"></p>';
+  E('pw').addEventListener('keydown',e=>{if(e.key==='Enter')pwIn()});return}
+ const {data:a}=await sb.from('admins').select('user_id').eq('user_id',me.id).maybeSingle();
+ if(!a){E('who').innerHTML='<p>Signed in as '+esc(me.user_metadata&&me.user_metadata.username||me.email)+', but this account is not a moderator. Add it with the SQL line at the end of supabase/schema.sql.</p><button class="alt" onclick="signOut()">Sign out</button>';return}
+ E('who').innerHTML='<p class="mute">Signed in as '+esc(me.user_metadata&&me.user_metadata.username||me.email)+' <button class="alt" onclick="signOut()">Sign out</button></p>';E('tabs').style.display='block';load();setInterval(load,30000)}
+async function pwIn(){const {error}=await sb.auth.signInWithPassword({email:E('un').value.trim().toLowerCase()+'@'+MP_NAME_DOMAIN,password:E('pw').value});if(error){E('err').textContent='Wrong name or password.';return}location.reload()}
+function signIn(){sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}})}
+async function signOut(){await sb.auth.signOut();location.reload()}
+async function load(){
+ const [{data:r,error:e1},{data:b}]=await Promise.all([sb.from('reports').select('*').order('created_at',{ascending:false}).limit(300),sb.from('banned').select('*').order('banned_at',{ascending:false})]);
+ if(e1){E('list').innerHTML='<p>Could not load reports: '+esc(e1.message)+'</p>';return}
+ R=r||[];B=b||[];const ids=[...new Set(R.flatMap(x=>[x.reporter,x.reported]).concat(B.map(x=>x.user_id)))];
+ if(ids.length){const {data:p}=await sb.from('players').select('id,nickname').in('id',ids);(p||[]).forEach(x=>nick[x.id]=x.nickname)}
+ const open=R.filter(x=>x.status==='open').length;document.querySelector('#tabs button').textContent='Open reports ('+open+')';document.title=(open?'('+open+') ':'')+'Conjurer Moderation';show(view)}
+const who=id=>esc(nick[id]||'(no nickname)')+' <span class="mute">'+esc(String(id).slice(0,8))+'</span>';
+function show(v){view=v;let h='';
+ if(v==='bans'){h=B.length?B.map(x=>'<div class="card row"><span>'+who(x.user_id)+'<br><span class="mute">Banned '+when(x.banned_at)+(x.reason?' · '+esc(x.reason):'')+'</span></span><button class="alt" onclick="unban(\''+x.user_id+'\')">Unban</button></div>').join(''):'<p class="mute">Nobody is banned.</p>'}
+ else{const L=R.filter(x=>v==='open'?x.status==='open':x.status!=='open');
+  const count=id=>R.filter(x=>x.reported===id).length;
+  h=L.length?L.map(x=>'<div class="card"><div class="row"><span><b>'+who(x.reported)+'</b> <span class="mute">reported '+count(x.reported)+' time(s) in total</span></span><span class="mute">'+when(x.created_at)+'</span></div>'
+   +(x.body?'<div class="msg">'+esc(x.body)+'</div>':'<p><i>Player report</i></p>')+(x.reason&&x.reason!=='chat'?'<p>Reporter says: '+esc(x.reason)+'</p>':'')
+   +'<p class="mute">Reported by '+who(x.reporter)+' in world '+esc(x.room||'')+'</p>'
+   +(x.status==='open'?'<button class="ban" onclick="ban(\''+x.reported+'\')">Ban player</button><button class="alt" onclick="dismiss('+x.id+')">Dismiss</button>':'<p class="mute">'+(x.status==='banned'?'Player banned':'Dismissed')+'</p>')+'</div>').join(''):'<p class="mute">'+(v==='open'?'No open reports. Nice and kind out there.':'Nothing here yet.')+'</p>'}
+ E('list').innerHTML=h;document.querySelectorAll('#tabs button').forEach((b,i)=>b.className=(['open','done','bans'][i]===v?'':'alt'))}
+async function ban(id){const why=prompt('Ban '+(nick[id]||'this player')+'? They will never be able to play again. Reason (optional):','Mean chat');if(why===null)return;const {error}=await sb.rpc('ban_user',{uid:id,why});if(error)alert(error.message);load()}
+async function unban(id){if(!confirm('Unban '+(nick[id]||'this player')+'?'))return;const {error}=await sb.rpc('unban_user',{uid:id});if(error)alert(error.message);load()}
+async function dismiss(id){const {error}=await sb.rpc('dismiss_report',{rid:id});if(error)alert(error.message);load()}
+boot();
+</script>
+</body>
+</html>
